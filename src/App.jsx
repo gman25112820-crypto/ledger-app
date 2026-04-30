@@ -34,46 +34,47 @@ function getDecision(data = {}) {
   const spent = data.spent ?? 0;
   const income = data.income ?? 0;
 
-  if (safe < -500) {
+  let score = 100;
+
+  if (safe < 0) score -= Math.min(45, Math.abs(safe) / 25);
+  if (unpaid > 0) score -= Math.min(20, unpaid / 25);
+  if (income > 0 && spent > income) score -= 20;
+  if (income > 0 && spent > income * 1.25) score -= 15;
+
+  score = Math.max(0, Math.round(score));
+
+  if (score < 35) {
     return {
+      score,
       level: "danger",
       leader: "Teds",
-      icon: "⚠️",
-      title: "High pressure",
-      message: "Pause non-essential spending and clear the nearest unpaid bill first.",
-      action: "Stop extra spending today.",
+      icon: "🔴",
+      title: "Danger zone",
+      message: "Your spending pressure is high. Protect bills first and pause non-essential spending.",
+      action: "Freeze extra spending today and clear the nearest unpaid bill.",
     };
   }
 
-  if (safe < 0) {
+  if (score < 70) {
     return {
+      score,
       level: "warning",
       leader: "Penny",
-      icon: "✨",
+      icon: "🟠",
       title: "Careful mode",
-      message: "You’re over your safe-to-spend line, but this is fixable if you stay steady.",
-      action: "Reduce spending until payday.",
-    };
-  }
-
-  if (unpaid > 0 || spent > income * 0.85) {
-    return {
-      level: "watch",
-      leader: "Eddie",
-      icon: "📊",
-      title: "Watch position",
-      message: "Bills or spending pressure need watching before you loosen up.",
-      action: "Check unpaid bills before spending.",
+      message: "You’re stretched, but this is recoverable with a steady plan.",
+      action: "Set a small daily spend limit until payday.",
     };
   }
 
   return {
+    score,
     level: "stable",
     leader: "Ledge",
-    icon: "🧾",
+    icon: "🟢",
     title: "Stable",
-    message: "You’re in control. Keep the plan simple and steady.",
-    action: "Keep building momentum.",
+    message: "Your position is controlled. Keep building momentum.",
+    action: "Keep bills covered and move a little toward your main goal.",
   };
 }
 
