@@ -10,6 +10,7 @@ import {
   Coins,
   Sparkles,
   AlertTriangle,
+  TrendingUp,
 } from "lucide-react";
 import "./App.css";
 
@@ -27,27 +28,75 @@ function money(value) {
     : `£${amount.toLocaleString()}`;
 }
 
+function getDecision(data = {}) {
+  const safe = data.safeToSpend ?? 0;
+  const unpaid = data.unpaidBills ?? 0;
+  const spent = data.spent ?? 0;
+  const income = data.income ?? 0;
+
+  if (safe < -500) {
+    return {
+      level: "danger",
+      leader: "Teds",
+      icon: "⚠️",
+      title: "High pressure",
+      message: "Pause non-essential spending and clear the nearest unpaid bill first.",
+      action: "Stop extra spending today.",
+    };
+  }
+
+  if (safe < 0) {
+    return {
+      level: "warning",
+      leader: "Penny",
+      icon: "✨",
+      title: "Careful mode",
+      message: "You’re over your safe-to-spend line, but this is fixable if you stay steady.",
+      action: "Reduce spending until payday.",
+    };
+  }
+
+  if (unpaid > 0 || spent > income * 0.85) {
+    return {
+      level: "watch",
+      leader: "Eddie",
+      icon: "📊",
+      title: "Watch position",
+      message: "Bills or spending pressure need watching before you loosen up.",
+      action: "Check unpaid bills before spending.",
+    };
+  }
+
+  return {
+    level: "stable",
+    leader: "Ledge",
+    icon: "🧾",
+    title: "Stable",
+    message: "You’re in control. Keep the plan simple and steady.",
+    action: "Keep building momentum.",
+  };
+}
+
 function getTeamVoice(type, data = {}) {
+  const decision = getDecision(data);
   const safe = data.safeToSpend ?? 0;
 
   const voices = {
     ledge: () =>
-      safe < 0
-        ? "Your money position needs attention. Stabilise first, then plan forward."
-        : "Position looks steady. Keep the plan simple and controlled.",
+      `${decision.title}. ${decision.message}`,
 
     penny: () =>
       safe < 0
-        ? "You’re over your safe-to-spend line — let’s rein it in, fab and steady ✨"
-        : "You’re doing fab — keep going and stay steady ✨",
+        ? "You’re over the line, but we’ll sort it step by step — fab and steady ✨"
+        : "You’re doing fab. Keep building, one sensible choice at a time ✨",
 
     eddie: () =>
-      `Income ${money(data.income)} vs spent ${money(data.spent)}. Numbers first, feelings second.`,
+      `Income ${money(data.income)} vs spent ${money(data.spent)}. Safe-to-spend is ${money(data.safeToSpend)}.`,
 
     teds: () =>
       safe < 0
-        ? "⚠️ Overspending detected. Pause non-essential spending."
-        : "No major risk alert. Keep watching the bills.",
+        ? "Overspending detected. Pause, protect bills, then reset."
+        : "No major risk alert. Keep watching the basics.",
   };
 
   return voices[type] ? voices[type]() : "";
@@ -83,6 +132,7 @@ export default function App() {
   );
 
   const teamData = { ...data, safeToSpend };
+  const decision = getDecision(teamData);
 
   return (
     <div className="min-h-screen bg-[#070712] text-white">
@@ -116,12 +166,12 @@ export default function App() {
           </p>
         </header>
 
-        {tab === "home" && <HomeScreen data={teamData} />}
-        {tab === "budget" && <SimplePanel title="Budget" text="Budget tools are ready for the next build." />}
+        {tab === "home" && <HomeScreen data={teamData} decision={decision} />}
+        {tab === "budget" && <BudgetScreen data={teamData} />}
         {tab === "goals" && <GoalsScreen data={teamData} />}
-        {tab === "penny" && <PennyScreen data={teamData} />}
+        {tab === "penny" && <PennyScreen data={teamData} decision={decision} />}
         {tab === "family" && <FamilyScreen />}
-        {tab === "plan" && <SimplePanel title="Plan" text="Your forward plan will live here." />}
+        {tab === "plan" && <PlanScreen decision={decision} />}
       </main>
 
       <BottomNav tab={tab} setTab={setTab} />
@@ -129,7 +179,7 @@ export default function App() {
   );
 }
 
-function HomeScreen({ data }) {
+function HomeScreen({ data, decision }) {
   return (
     <div className="space-y-4">
       <GlassCard>
@@ -148,9 +198,10 @@ function HomeScreen({ data }) {
         </div>
       </GlassCard>
 
+      <DecisionCard decision={decision} />
+
       <GlassCard>
         <Label>Today’s money position</Label>
-
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Metric title="Safe to spend" value={money(data.safeToSpend)} danger={data.safeToSpend < 0} />
           <Metric title="Payday countdown" value={`${data.paydayDay}d`} />
@@ -196,6 +247,49 @@ function HomeScreen({ data }) {
   );
 }
 
+function DecisionCard({ decision }) {
+  const colour =
+    decision.level === "danger"
+      ? "border-red-400/30 bg-red-500/10"
+      : decision.level === "warning"
+      ? "border-yellow-400/30 bg-yellow-500/10"
+      : decision.level === "watch"
+      ? "border-sky-400/30 bg-sky-500/10"
+      : "border-emerald-400/30 bg-emerald-500/10";
+
+  return (
+    <section className={`rounded-[28px] border p-5 ${colour}`}>
+      <div className="flex items-start gap-3">
+        <div className="text-3xl">{decision.icon}</div>
+        <div>
+          <div className="text-[11px] font-black uppercase tracking-[0.3em] text-white/50">
+            Decision Engine
+          </div>
+          <h2 className="mt-1 text-xl font-black">{decision.leader}: {decision.title}</h2>
+          <p className="mt-2 text-sm text-white/70">{decision.message}</p>
+          <div className="mt-4 rounded-2xl bg-black/20 p-3 text-sm font-bold">
+            Best action: {decision.action}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BudgetScreen({ data }) {
+  return (
+    <GlassCard>
+      <Label>Budget</Label>
+      <p className="mt-4 text-sm text-white/70">
+        Eddie says: {getTeamVoice("eddie", data)}
+      </p>
+      <p className="mt-4 text-sm text-white/55">
+        Next build: editable categories, spending caps, and bill toggles.
+      </p>
+    </GlassCard>
+  );
+}
+
 function GoalsScreen({ data }) {
   return (
     <div className="space-y-4">
@@ -227,17 +321,21 @@ function GoalsScreen({ data }) {
   );
 }
 
-function PennyScreen({ data }) {
+function PennyScreen({ data, decision }) {
   return (
-    <GlassCard>
-      <Label>Penny Chat</Label>
-      <p className="mt-4 text-sm leading-relaxed text-white/70">
-        {getTeamVoice("penny", data)}
-      </p>
-      <p className="mt-4 rounded-2xl bg-white/[0.06] p-4 text-sm text-white/65">
-        Penny says: “Look after the pennies, and the pounds look after themselves.”
-      </p>
-    </GlassCard>
+    <div className="space-y-4">
+      <GlassCard>
+        <Label>Penny Chat</Label>
+        <p className="mt-4 text-sm leading-relaxed text-white/70">
+          {getTeamVoice("penny", data)}
+        </p>
+        <p className="mt-4 rounded-2xl bg-white/[0.06] p-4 text-sm text-white/65">
+          Penny says: “Look after the pennies, and the pounds look after themselves.”
+        </p>
+      </GlassCard>
+
+      <DecisionCard decision={decision} />
+    </div>
   );
 }
 
@@ -256,6 +354,20 @@ function FamilyScreen() {
   );
 }
 
+function PlanScreen({ decision }) {
+  return (
+    <GlassCard>
+      <Label>Plan</Label>
+      <p className="mt-4 text-sm text-white/70">
+        Current priority: {decision.action}
+      </p>
+      <p className="mt-4 text-sm text-white/55">
+        Next build: weekly plan, payday plan, and debt-clear roadmap.
+      </p>
+    </GlassCard>
+  );
+}
+
 function FamilyCard({ title, age }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-3">
@@ -263,15 +375,6 @@ function FamilyCard({ title, age }) {
       <div className="text-sm font-black">{title}</div>
       <div className="text-xs text-emerald-300">{age}</div>
     </div>
-  );
-}
-
-function SimplePanel({ title, text }) {
-  return (
-    <GlassCard>
-      <Label>{title}</Label>
-      <p className="mt-4 text-sm text-white/70">{text}</p>
-    </GlassCard>
   );
 }
 
