@@ -96,7 +96,7 @@ function getTeamVoice(type, data = {}) {
 
     teds: () =>
       safe < 0
-        ? "Overspending detected. Pause, protect bills, then reset."
+        ? "Overspending detected. Pause non-essential spending, protect bills, then reset."
         : "No major risk alert. Keep watching the basics.",
   };
 
@@ -142,6 +142,7 @@ export default function App() {
           <div className="text-[11px] font-black uppercase tracking-[0.35em] text-violet-300">
             Ledger
           </div>
+          <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-white/30">Ledger Build: Decision OS v3</div>
 
           <div className="mt-2 flex items-start justify-between gap-4">
             <div>
@@ -363,7 +364,7 @@ function PlanScreen({ decision }) {
         Current priority: {decision.action}
       </p>
       <p className="mt-4 text-sm text-white/55">
-        Next build: weekly plan, payday plan, and debt-clear roadmap.
+        Next build ready: weekly plan, payday plan, bill priority, and debt-clear roadmap.
       </p>
     </GlassCard>
   );
