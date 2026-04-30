@@ -341,15 +341,163 @@ function PennyScreen({ data, decision }) {
   );
 }
 
+
 function FamilyScreen() {
+  const [stage, setStage] = useState("little");
+  const [coins, setCoins] = useState(3);
+  const [stars, setStars] = useState(0);
+  const [choice, setChoice] = useState("Pick a money move to learn.");
+
+  const stages = {
+    little: {
+      title: "Little Learner",
+      age: "4–7",
+      lesson: "Spend some, save some, share some.",
+      game: "Coin Choice Game",
+    },
+    explorer: {
+      title: "Money Explorer",
+      age: "8–12",
+      lesson: "Earn, choose, wait, and plan.",
+      game: "Pocket Money Quest",
+    },
+    teen: {
+      title: "Teen Builder",
+      age: "13–17",
+      lesson: "Budget, bills, subscriptions, and goals.",
+      game: "Budget Boss Challenge",
+    },
+  };
+
+  const active = stages[stage];
+
+  function makeChoice(type) {
+    if (coins <= 0) {
+      setChoice("You used today’s coins. Nice learning — come back tomorrow.");
+      return;
+    }
+
+    setCoins((c) => c - 1);
+    setStars((s) => s + 1);
+
+    if (type === "spend") {
+      setChoice("Spend choice: fun is okay when it fits the plan.");
+    }
+
+    if (type === "save") {
+      setChoice("Save choice: fab patience — future-you gets stronger.");
+    }
+
+    if (type === "share") {
+      setChoice("Share choice: kind money matters too.");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <GlassCard>
         <Label>Ledger Family</Label>
+
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <FamilyCard title="Little Learner" age="4–7" />
-          <FamilyCard title="Money Explorer" age="8–12" />
-          <FamilyCard title="Teen Builder" age="13–17" />
+          {Object.entries(stages).map(([id, item]) => (
+            <button
+              key={id}
+              onClick={() => {
+                setStage(id);
+                setChoice("Pick a money move to learn.");
+              }}
+              className={`rounded-2xl border p-3 text-left transition ${
+                stage === id
+                  ? "border-violet-300 bg-violet-600/30"
+                  : "border-white/10 bg-white/[0.05]"
+              }`}
+            >
+              <Users className="mb-2 h-5 w-5 text-violet-200" />
+              <div className="text-sm font-black">{item.title}</div>
+              <div className="text-xs text-emerald-300">{item.age}</div>
+            </button>
+          ))}
+        </div>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <Label>{active.title}</Label>
+            <h2 className="mt-2 text-2xl font-black">{active.game}</h2>
+            <p className="mt-2 text-sm text-white/65">{active.lesson}</p>
+          </div>
+
+          <div className="rounded-3xl bg-yellow-400 px-4 py-3 text-center text-black">
+            <div className="text-xs font-black">Coins</div>
+            <div className="text-2xl font-black">{coins}</div>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-3">
+          <button onClick={() => makeChoice("spend")} className="rounded-2xl bg-pink-500/20 p-4 text-sm font-black">
+            🛍️ Spend
+          </button>
+
+          <button onClick={() => makeChoice("save")} className="rounded-2xl bg-emerald-500/20 p-4 text-sm font-black">
+            🐷 Save
+          </button>
+
+          <button onClick={() => makeChoice("share")} className="rounded-2xl bg-sky-500/20 p-4 text-sm font-black">
+            🎁 Share
+          </button>
+        </div>
+
+        <div className="mt-5 rounded-3xl bg-white/[0.06] p-4">
+          <div className="text-sm font-black text-violet-200">Penny says ✨</div>
+          <p className="mt-2 text-sm text-white/70">{choice}</p>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between rounded-3xl bg-black/20 p-4">
+          <div>
+            <div className="text-xs uppercase tracking-[0.25em] text-white/40">Learning stars</div>
+            <div className="mt-1 text-xl font-black">{"⭐".repeat(Math.min(stars, 5)) || "No stars yet"}</div>
+          </div>
+          <button
+            onClick={() => {
+              setCoins(3);
+              setStars(0);
+              setChoice("Fresh start. Pick a money move to learn.");
+            }}
+            className="rounded-2xl border border-white/10 px-4 py-2 text-sm font-bold text-white/70"
+          >
+            Reset
+          </button>
+        </div>
+      </GlassCard>
+
+      <GlassCard>
+        <Label>Learning Path</Label>
+
+        <div className="mt-4 space-y-3 text-sm text-white/70">
+          {stage === "little" && (
+            <>
+              <p>✅ Learn that money can be split into spend, save, and share.</p>
+              <p>✅ Build early confidence without fear or pressure.</p>
+              <p>✅ Penny keeps it playful and kind.</p>
+            </>
+          )}
+
+          {stage === "explorer" && (
+            <>
+              <p>✅ Track pocket money and chores.</p>
+              <p>✅ Learn waiting, saving, and choosing.</p>
+              <p>✅ Start simple goal planning.</p>
+            </>
+          )}
+
+          {stage === "teen" && (
+            <>
+              <p>✅ Learn weekly budgeting.</p>
+              <p>✅ Understand subscriptions and commitments.</p>
+              <p>✅ Build independence before adulthood.</p>
+            </>
+          )}
         </div>
       </GlassCard>
     </div>
