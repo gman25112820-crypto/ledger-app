@@ -14,6 +14,32 @@ function getGreeting() {
   if (hour < 18) return "Good afternoon";
   return "Good evening";
 }
+// --- LEDGER TEAM SYSTEM ---
+function getTeamVoice(type, data) {
+  const voices = {
+    ledge: () => {
+      return `Here’s your position. Stay sharp.`;
+    },
+
+    penny: () => {
+      return data.safeToSpend < 0
+        ? `You’re over your limit — let’s rein it in ✨`
+        : `You’re doing fab — keep going ✨`;
+    },
+
+    eddie: () => {
+      return `Income £${data.income} vs spent £${data.spent}`;
+    },
+
+    teds: () => {
+      return data.safeToSpend < 0
+        ? `⚠️ You’re overspending. Fix this.`
+        : `All stable. No alerts.`;
+    },
+  };
+
+  return voices[type] ? voices[type]() : "";
+}
 
 
 
@@ -403,7 +429,11 @@ function HomeScreen({ data, setData }) {
             <div className="flex items-center gap-2 text-sm font-black text-white">
               Penny Today <Sparkles className="h-4 w-4 text-yellow-300" />
             </div>
-            <p className="mt-1 text-sm leading-relaxed text-white/70">{nextAction}</p>
+            <p className="mt-1 text-sm leading-relaxed text-white/70">{getTeamVoice("penny", {
+  safeToSpend,
+  income: data.income,
+  spent: data.spent
+})}</p>
           </div>
         </div>
       </GlassCard>
