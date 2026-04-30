@@ -1,20 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
+
+
+
+
 
 import { motion, AnimatePresence } from "framer-motion";
 
 function getGreeting() {
   const hour = new Date().getHours();
+
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
 }
+
+
+
+
+
+
 
 import {
   Home,
@@ -39,12 +44,10 @@ import {
   Coins,
 } from "lucide-react";
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
+
+
+
+
 
 
 // Ledger — single-file React prototype
@@ -1190,4 +1193,5 @@ export default function App() {
     </div>
   );
 }
+
 
