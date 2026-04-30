@@ -316,7 +316,7 @@ function AppHeader({ data, onEdit }) {
         <div>
           <div className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-violet-300">Ledger</div>
           <h1 className="mt-1 text-3xl font-black tracking-tight text-white">
-            {data.mood ? `${data.mood} {getGreeting()}` : "{getGreeting()}"}
+            {data.mood ? `${data.mood} ${getGreeting()}` : getGreeting()}
           </h1>
           <div className="mt-1 text-sm text-white/45">
             {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
