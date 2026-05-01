@@ -154,7 +154,7 @@ export default function App() {
           </div>
         </section>
 
-        <nav className="tabs desktop-tabs">
+        <nav className="tabs">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -530,19 +530,6 @@ function NumberInput({ label, value, onChange }) {
   return (
     <label className="field">
       <span>{label}</span>
-      
-      <nav className="mobile-nav">
-        {["Home", "Budget", "Goals", "Penny", "Plan"].map((tab) => (
-          <button
-            key={tab}
-            className={activeTab === tab ? "mobile-active" : ""}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
-      </nav>
-
       <input
         type="number"
         value={value}
