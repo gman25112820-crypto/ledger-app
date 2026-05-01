@@ -3,6 +3,19 @@ import "./App.css";
 
 const STORAGE_KEY = "ledger_v2_state";
 
+const defaultProtectedItems = [
+  { id: "rent-home", name: "Rent / home payment", amount: 0, category: "Home", priority: 1 },
+  { id: "council-tax", name: "Council tax", amount: 0, category: "Home", priority: 1 },
+  { id: "utilities", name: "Gas, electric and water", amount: 0, category: "Bills", priority: 1 },
+  { id: "food", name: "Food shop buffer", amount: 300, category: "Essentials", priority: 1 },
+  { id: "fuel-travel", name: "Fuel / travel", amount: 120, category: "Essentials", priority: 1 },
+  { id: "school-costs", name: "School costs", amount: 60, category: "Family", priority: 2 },
+  { id: "subscriptions", name: "Subscriptions / renewals", amount: 60, category: "Bills", priority: 2 },
+  { id: "pets", name: "Pets and insurance buffer", amount: 45, category: "Pets", priority: 2 },
+  { id: "debt-minimums", name: "Debt minimum payments", amount: 75, category: "Debt", priority: 1 },
+  { id: "emergency", name: "Emergency breathing space", amount: 100, category: "Safety", priority: 1 },
+];
+
 const defaultSavingsPots = [
   { id: "school-clubs", name: "School clubs", target: 240, saved: 40, dueDate: "2026-09-01", priority: 2 },
   { id: "birthdays", name: "Birthdays", target: 500, saved: 120, dueDate: "2026-06-30", priority: 2 },
@@ -32,6 +45,7 @@ const defaultState = {
   subscriptions: 28,
   debtPayment: 75,
 savingsPots: defaultSavingsPots,
+  protectedItems: defaultProtectedItems,
 };
 
 function currency(value) {
@@ -118,7 +132,7 @@ export default function App() {
     setActiveTab("Home");
   };
 
-  const tabs = ["Home", "Budget", "Goals", "Savings", "Penny", "Family", "Plan"];
+  const tabs = ["Home", "Budget", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
 
   return (
     <div className="ledger-shell">
@@ -194,7 +208,10 @@ export default function App() {
             <GoalsPanel state={state} update={update} figures={figures} />
           )}
 
-          {activeTab === "Savings" && (
+          {activeTab === "Protected" && (
+          <ProtectedMoneyPanel state={state} update={update} figures={figures} />
+        )}
+        {activeTab === "Savings" && (
           <SavingsPanel state={state} update={update} figures={figures} />
         )}
         {activeTab === "Penny" && (
@@ -344,6 +361,181 @@ function GoalsPanel({ state, update, figures }) {
       </div>
     </section>
   );
+}
+
+function ProtectedMoneyPanel({ state, update, figures }) {
+  const protectedItems = getProtectedItems(state);
+  const savingsPots = getSavingsPotsForProtection(state);
+
+  const protectedTotal = protectedItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const mustProtectTotal = protectedItems
+    .filter((item) => Number(item.priority || 1) === 1)
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+  const plannedSavingsPush = savingsPots.reduce((sum, pot) => {
+    const target = Number(pot.target || 0);
+    const saved = Number(pot.saved || 0);
+    const remaining = Math.max(0, target - saved);
+    return sum + Math.ceil(remaining / Math.max(monthsUntilProtected(pot.dueDate), 1));
+  }, 0);
+
+  const income = Number(state.income || figures.income || 0);
+  const spend = Number(state.spent || figures.spent || 0);
+  const trueFreeCash = income - spend - protectedTotal - plannedSavingsPush;
+  const protectionRatio = income > 0 ? Math.round((protectedTotal / income) * 100) : 0;
+  const status = getProtectionStatus(trueFreeCash, protectionRatio);
+
+  const updateProtectedItem = (id, key, value) => {
+    const nextItems = protectedItems.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            [key]: key === "amount" || key === "priority" ? Number(value) : value,
+          }
+        : item
+    );
+
+    update("protectedItems", nextItems);
+  };
+
+  return (
+    <>
+      <div className="section-title">
+        <div>
+          <span className="kicker">PROTECTED MONEY ENGINE</span>
+          <h2>Money that must not be touched</h2>
+          <p>
+            What is happening: Ledger is ring-fencing essentials before calling money safe.
+            What it means: bills, food, family basics and minimum payments are protected first.
+            What to do next: edit the protected amounts, then only spend from the true free cash.
+          </p>
+        </div>
+        <div className={`safe-pill small ${trueFreeCash < 0 ? "danger" : ""}`}>
+          <span>True free cash</span>
+          <strong>{currency(trueFreeCash)}</strong>
+        </div>
+      </div>
+
+      <div className="protected-status-card">
+        <div>
+          <span className="kicker">LEDGE STATUS</span>
+          <h3>{status.title}</h3>
+          <p>{status.message}</p>
+        </div>
+        <div className={`protection-light ${status.level}`}>
+          {status.label}
+        </div>
+      </div>
+
+      <div className="metric-grid compact">
+        <Metric title="Protected total" value={currency(protectedTotal)} />
+        <Metric title="Must-protect bills" value={currency(mustProtectTotal)} />
+        <Metric title="Savings push included" value={currency(plannedSavingsPush)} />
+        <Metric title="Protection ratio" value={`${protectionRatio}%`} />
+      </div>
+
+      <div className="panel savings-advice-card">
+        <span className="kicker">PENNY PROTECTION ADVICE ✨</span>
+        <p>{getProtectedAdvice(trueFreeCash, protectedTotal, plannedSavingsPush)}</p>
+      </div>
+
+      <div className="protected-grid">
+        {protectedItems.map((item) => (
+          <div className="protected-item-card" key={item.id}>
+            <div>
+              <span className="pot-rank">{item.category}</span>
+              <h3>{item.name}</h3>
+            </div>
+
+            <div className="protected-edit-row">
+              <NumberInput
+                label="Protected amount"
+                value={item.amount}
+                onChange={(v) => updateProtectedItem(item.id, "amount", v)}
+              />
+
+              <label className="field">
+                <span>Priority</span>
+                <select
+                  value={item.priority || 1}
+                  onChange={(e) => updateProtectedItem(item.id, "priority", e.target.value)}
+                >
+                  <option value={1}>Must protect</option>
+                  <option value={2}>Important</option>
+                  <option value={3}>Flexible</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function getProtectedItems(state) {
+  return Array.isArray(state.protectedItems) && state.protectedItems.length
+    ? state.protectedItems
+    : defaultProtectedItems;
+}
+
+function getSavingsPotsForProtection(state) {
+  if (Array.isArray(state.savingsPots) && state.savingsPots.length) return state.savingsPots;
+  if (typeof defaultSavingsPots !== "undefined") return defaultSavingsPots;
+  return [];
+}
+
+function monthsUntilProtected(dateValue) {
+  if (!dateValue) return 12;
+
+  const today = new Date();
+  const due = new Date(dateValue);
+
+  if (Number.isNaN(due.getTime())) return 12;
+
+  const years = due.getFullYear() - today.getFullYear();
+  const months = due.getMonth() - today.getMonth();
+
+  return Math.max(1, years * 12 + months + 1);
+}
+
+function getProtectionStatus(trueFreeCash, protectionRatio) {
+  if (trueFreeCash < 0) {
+    return {
+      level: "red",
+      label: "LOCK",
+      title: "Protected money breach risk",
+      message: "Spending or savings pushes are currently eating into money that should be protected.",
+    };
+  }
+
+  if (trueFreeCash < 100 || protectionRatio > 80) {
+    return {
+      level: "amber",
+      label: "TIGHT",
+      title: "Protected but tight",
+      message: "The essentials are covered, but there is not much breathing room. Keep optional spending controlled.",
+    };
+  }
+
+  return {
+    level: "green",
+    label: "SAFE",
+    title: "Protected money is covered",
+    message: "Essentials are ring-fenced and there is still usable breathing space after protection.",
+  };
+}
+
+function getProtectedAdvice(trueFreeCash, protectedTotal, plannedSavingsPush) {
+  if (trueFreeCash < 0) {
+    return "Fab honesty moment: this month is not safe yet. Reduce flexible spending first, pause nice-to-have pots, and protect home, food, school, pets and debt minimums.";
+  }
+
+  if (trueFreeCash < 100) {
+    return "You are protected, but only just. Keep the savings push small, check subscriptions, and avoid surprise spends until payday.";
+  }
+
+  return `Fabulous. Ledger has protected ${currency(protectedTotal)} and still included ${currency(plannedSavingsPush)} toward family pots. Spend only from true free cash.`;
 }
 
 function SavingsPanel({ state, update, figures }) {

@@ -743,3 +743,110 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Ledger v3.8 Protected Money Engine */
+.protected-status-card {
+  margin: 18px 0;
+  padding: 22px;
+  border: 1px solid rgba(76, 240, 166, 0.22);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top left, rgba(76, 240, 166, 0.16), transparent 35%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035));
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.protected-status-card h3 {
+  margin: 8px 0;
+  font-size: 26px;
+  letter-spacing: -0.04em;
+}
+
+.protected-status-card p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 760px;
+}
+
+.protection-light {
+  min-width: 92px;
+  min-height: 92px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.protection-light.green {
+  color: var(--green);
+  background: rgba(76, 240, 166, 0.12);
+  box-shadow: 0 0 34px rgba(76, 240, 166, 0.16);
+}
+
+.protection-light.amber {
+  color: #ffd36a;
+  background: rgba(255, 211, 106, 0.12);
+  box-shadow: 0 0 34px rgba(255, 211, 106, 0.14);
+}
+
+.protection-light.red {
+  color: #ff7a90;
+  background: rgba(255, 70, 105, 0.12);
+  box-shadow: 0 0 34px rgba(255, 70, 105, 0.16);
+}
+
+.safe-pill.danger {
+  border-color: rgba(255, 70, 105, 0.35);
+  background: rgba(255, 70, 105, 0.12);
+}
+
+.safe-pill.danger strong {
+  color: #ff7a90;
+}
+
+.protected-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.protected-item-card {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: var(--shadow);
+}
+
+.protected-item-card h3 {
+  margin: 10px 0 0;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.protected-edit-row {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .protected-status-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .protected-grid,
+  .protected-edit-row {
+    grid-template-columns: 1fr;
+  }
+}
