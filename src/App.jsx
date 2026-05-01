@@ -164,7 +164,7 @@ export default function App() {
     setActiveTab("Home");
   };
 
-  const tabs = ["Home", "Budget", "Shopping", "Watchtower", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
+  const tabs = ["Home", "Budget", "Bills", "Shopping", "Watchtower", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
 
   return (
     <div className="ledger-shell">
@@ -228,7 +228,9 @@ export default function App() {
         </nav>
 
         <main>
-          {activeTab === "Home" && (
+          <CommandModuleDock activeTab={activeTab} setActiveTab={setActiveTab} />
+
+        {activeTab === "Home" && (
             <HomePanel state={state} figures={figures} />
           )}
 
@@ -275,6 +277,40 @@ export default function App() {
       )}
 
       {safetyOpen && <SafetyModal onClose={() => setSafetyOpen(false)} />}
+    </div>
+  );
+}
+
+function CommandModuleDock({ activeTab, setActiveTab }) {
+  const modules = [
+    { name: "Bills", icon: "📅", label: "Bills", detail: "Payment radar" },
+    { name: "Shopping", icon: "🛒", label: "Shopping", detail: "Spend guard" },
+    { name: "Watchtower", icon: "🛡️", label: "Watchtower", detail: "Security team" },
+    { name: "Protected", icon: "🔒", label: "Protected", detail: "Safe money" },
+    { name: "Savings", icon: "🏦", label: "Savings", detail: "Family pots" },
+  ];
+
+  return (
+    <div className="command-module-dock-v406">
+      <div className="command-module-title-v406">
+        <span className="kicker">LEDGER COMMAND MODULES</span>
+        <strong>Open new tools</strong>
+      </div>
+
+      <div className="command-module-grid-v406">
+        {modules.map((mod) => (
+          <button
+            type="button"
+            key={mod.name}
+            className={`command-module-button-v406 ${activeTab === mod.name ? "active" : ""}`}
+            onClick={() => setActiveTab(mod.name)}
+          >
+            <span>{mod.icon}</span>
+            <strong>{mod.label}</strong>
+            <small>{mod.detail}</small>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
