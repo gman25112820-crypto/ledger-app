@@ -1809,3 +1809,168 @@ body {
 button {
   font-family: inherit;
 }
+
+
+/* Ledger v4.2 Bills Calendar + Payment Radar */
+.bills-radar-card {
+  margin: 18px 0;
+  padding: 24px;
+  border: 1px solid rgba(76, 240, 166, 0.22);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at top left, rgba(76, 240, 166, 0.15), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(127, 34, 255, 0.14), transparent 34%),
+    rgba(255, 255, 255, 0.06);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.bills-radar-card h3 {
+  margin: 8px 0;
+  font-size: 28px;
+  letter-spacing: -0.04em;
+}
+
+.bills-radar-card p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 780px;
+}
+
+.bills-light {
+  min-width: 98px;
+  min-height: 98px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.bills-light.green {
+  color: var(--green);
+  background: rgba(76, 240, 166, 0.12);
+  box-shadow: 0 0 34px rgba(76, 240, 166, 0.18);
+}
+
+.bills-light.amber {
+  color: #ffd36a;
+  background: rgba(255, 211, 106, 0.12);
+  box-shadow: 0 0 34px rgba(255, 211, 106, 0.16);
+}
+
+.bills-light.red {
+  color: #ff7a90;
+  background: rgba(255, 70, 105, 0.12);
+  box-shadow: 0 0 34px rgba(255, 70, 105, 0.18);
+}
+
+.bills-advice {
+  margin: 18px 0;
+  border-color: rgba(255, 208, 90, 0.28);
+  background: linear-gradient(135deg, rgba(255, 208, 90, 0.1), rgba(127, 34, 255, 0.1)), var(--panel);
+}
+
+.bills-layout {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1.35fr 0.75fr;
+  gap: 16px;
+}
+
+.bills-list-panel,
+.bills-side-panel {
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow);
+}
+
+.bills-list {
+  display: grid;
+  gap: 14px;
+}
+
+.bill-card {
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.bill-card.overdue,
+.bill-card.urgent {
+  border-color: rgba(255, 70, 105, 0.36);
+  background:
+    radial-gradient(circle at top right, rgba(255, 70, 105, 0.13), transparent 32%),
+    rgba(0, 0, 0, 0.18);
+}
+
+.bill-card.soon {
+  border-color: rgba(255, 211, 106, 0.35);
+  background:
+    radial-gradient(circle at top right, rgba(255, 211, 106, 0.12), transparent 32%),
+    rgba(0, 0, 0, 0.18);
+}
+
+.bill-card.paid {
+  opacity: 0.72;
+  border-color: rgba(76, 240, 166, 0.24);
+}
+
+.bill-top,
+.bill-name-row,
+.bill-status-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.bill-name-row {
+  margin-top: 14px;
+}
+
+.bill-name-row h3 {
+  margin: 10px 0 0;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.bill-name-row strong {
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.bill-status-line {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.bill-edit-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .bills-layout,
+  .bill-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bills-radar-card,
+  .bill-top,
+  .bill-name-row,
+  .bill-status-line {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

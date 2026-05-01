@@ -2,6 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 const STORAGE_KEY = "ledger_v2_state";
+
+const defaultBills = [
+  { id: "council", name: "Council / utilities", amount: 180, dueDate: "2026-05-05", paid: true, category: "Home", priority: "Must pay" },
+  { id: "phones", name: "Phones / internet", amount: 75, dueDate: "2026-05-12", paid: false, category: "Household", priority: "Important" },
+  { id: "transport", name: "Transport / fuel", amount: 155, dueDate: "2026-05-18", paid: false, category: "Travel", priority: "Must pay" },
+  { id: "kids-school", name: "Kids / school", amount: 120, dueDate: "2026-05-22", paid: false, category: "Family", priority: "Important" },
+  { id: "rent-housing", name: "Rent / housing", amount: 900, dueDate: "2026-05-01", paid: true, category: "Home", priority: "Must pay" },
+  { id: "pet-insurance", name: "Pet insurance", amount: 22, dueDate: "2026-05-21", paid: false, category: "Pets", priority: "Important" },
+  { id: "home-insurance", name: "Home insurance", amount: 30, dueDate: "2026-05-29", paid: false, category: "Insurance", priority: "Must pay" },
+];
 const LEDGER_NAV_UNLOCK_STAMP = "nav-unlocked-v4.0.3";
 const LEDGER_BUILD_STAMP = "v4.0.2-runtime-visible-1777654190978";
 
@@ -77,6 +87,7 @@ savingsPots: defaultSavingsPots,
   protectedItems: defaultProtectedItems,
   shoppingItems: defaultShoppingItems,
   subscriptionItems: defaultSubscriptions,
+  bills: defaultBills,
   securityLog: defaultSecurityLog,
 };
 
@@ -164,7 +175,7 @@ export default function App() {
     setActiveTab("Home");
   };
 
-  const tabs = ["Home","Budget","Bills","Shopping","Watchtower","Protected","Goals","Savings","Penny","Family","Plan"];
+  const tabs = ["Home", "Budget", "Bills", "Shopping", "Watchtower", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
 
   return (
     <div className="ledger-shell">
@@ -244,6 +255,9 @@ export default function App() {
 
           {activeTab === "Watchtower" && (
           <WatchtowerPanel state={state} update={update} figures={figures} />
+        )}
+        {activeTab === "Bills" && (
+          <BillsRadarPanel state={state} update={update} figures={figures} />
         )}
         {activeTab === "Shopping" && (
           <ShoppingGuardPanel state={state} update={update} figures={figures} />
@@ -808,6 +822,329 @@ function formatShortDate(dateValue) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function BillsRadarPanel({ state, update, figures }) {
+  const bills = getBills(state);
+
+  const analysedBills = bills
+    .map((bill) => {
+      const amount = Number(bill.amount || 0);
+      const days = daysUntilBill(bill.dueDate);
+      const paid = Boolean(bill.paid);
+      const urgency =
+        paid ? "paid" :
+        days < 0 ? "overdue" :
+        days <= 3 ? "urgent" :
+        days <= 7 ? "soon" :
+        "planned";
+
+      return { ...bill, amount, days, paid, urgency };
+    })
+    .sort((a, b) => {
+      if (a.paid !== b.paid) return a.paid ? 1 : -1;
+      return a.days - b.days;
+    });
+
+  const unpaidBills = analysedBills.filter((bill) => !bill.paid);
+  const paidBills = analysedBills.filter((bill) => bill.paid);
+  const overdueBills = unpaidBills.filter((bill) => bill.days < 0);
+  const dueThisWeek = unpaidBills.filter((bill) => bill.days >= 0 && bill.days <= 7);
+  const unpaidTotal = unpaidBills.reduce((sum, bill) => sum + bill.amount, 0);
+  const dueThisWeekTotal = dueThisWeek.reduce((sum, bill) => sum + bill.amount, 0);
+  const mustPayTotal = unpaidBills
+    .filter((bill) => bill.priority === "Must pay")
+    .reduce((sum, bill) => sum + bill.amount, 0);
+
+  const safeAfterBills = Number(figures.safe || 0) - unpaidTotal;
+  const decision = getBillsRadarDecision(safeAfterBills, overdueBills, dueThisWeek, mustPayTotal);
+
+  const updateBill = (id, key, value) => {
+    const next = bills.map((bill) =>
+      bill.id === id
+        ? {
+            ...bill,
+            [key]: key === "amount" ? Number(value) : value,
+          }
+        : bill
+    );
+
+    update("bills", next);
+  };
+
+  const addBill = () => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    update("bills", [
+      {
+        id: `bill-${Date.now()}`,
+        name: "New bill",
+        amount: 0,
+        dueDate: today,
+        paid: false,
+        category: "General",
+        priority: "Important",
+      },
+      ...bills,
+    ]);
+  };
+
+  const removeBill = (id) => {
+    update("bills", bills.filter((bill) => bill.id !== id));
+  };
+
+  const resetBills = () => {
+    update("bills", defaultBills);
+  };
+
+  return (
+    <>
+      <div className="section-title">
+        <div>
+          <span className="kicker">BILLS CALENDAR + PAYMENT RADAR</span>
+          <h2>Know what is due before it hits</h2>
+          <p>
+            What is happening: Ledger is lining up bills by due date.
+            What it means: unpaid bills reduce what is truly safe.
+            What to do next: clear overdue and this-week bills before spending on extras.
+          </p>
+        </div>
+
+        <div className={`safe-pill small ${safeAfterBills < 0 ? "danger" : ""}`}>
+          <span>Safe after bills</span>
+          <strong>{currency(safeAfterBills)}</strong>
+        </div>
+      </div>
+
+      <div className="bills-radar-card">
+        <div>
+          <span className="kicker">LEDGE PAYMENT RADAR</span>
+          <h3>{decision.title}</h3>
+          <p>{decision.message}</p>
+        </div>
+
+        <div className={`bills-light ${decision.level}`}>
+          {decision.label}
+        </div>
+      </div>
+
+      <div className="metric-grid compact">
+        <Metric title="Unpaid bills" value={currency(unpaidTotal)} />
+        <Metric title="Due this week" value={currency(dueThisWeekTotal)} />
+        <Metric title="Must-pay total" value={currency(mustPayTotal)} />
+        <Metric title="Paid bills" value={paidBills.length} />
+      </div>
+
+      <div className="shopping-actions">
+        <button className="primary-action" onClick={addBill}>
+          Add bill
+        </button>
+        <button className="ghost-action" onClick={resetBills}>
+          Reset demo bills
+        </button>
+      </div>
+
+      <div className="panel bills-advice">
+        <span className="kicker">PENNY PAYMENT ADVICE ✨</span>
+        <p>{getBillsAdvice(safeAfterBills, overdueBills, dueThisWeek, unpaidTotal)}</p>
+      </div>
+
+      <div className="bills-layout">
+        <div className="bills-list-panel">
+          <div className="column-head">
+            <span className="kicker">BILLS CALENDAR</span>
+            <h3>Due-date control</h3>
+          </div>
+
+          <div className="bills-list">
+            {analysedBills.map((bill) => (
+              <div className={`bill-card ${bill.urgency}`} key={bill.id}>
+                <div className="bill-top">
+                  <label className="shopping-check">
+                    <input
+                      type="checkbox"
+                      checked={bill.paid}
+                      onChange={(e) => updateBill(bill.id, "paid", e.target.checked)}
+                    />
+                    <span>{bill.paid ? "Paid" : "Unpaid"}</span>
+                  </label>
+
+                  <button className="remove-mini" onClick={() => removeBill(bill.id)}>
+                    Remove
+                  </button>
+                </div>
+
+                <div className="bill-name-row">
+                  <div>
+                    <span className="pot-rank">{bill.category}</span>
+                    <h3>{bill.name}</h3>
+                  </div>
+                  <strong>{currency(bill.amount)}</strong>
+                </div>
+
+                <div className="bill-status-line">
+                  <span>{getBillDueLabel(bill)}</span>
+                  <span>{bill.priority}</span>
+                </div>
+
+                <div className="bill-edit-grid">
+                  <label className="field">
+                    <span>Bill name</span>
+                    <input
+                      value={bill.name || ""}
+                      onChange={(e) => updateBill(bill.id, "name", e.target.value)}
+                    />
+                  </label>
+
+                  <NumberInput
+                    label="Amount"
+                    value={bill.amount}
+                    onChange={(v) => updateBill(bill.id, "amount", v)}
+                  />
+
+                  <label className="field">
+                    <span>Due date</span>
+                    <input
+                      type="date"
+                      value={bill.dueDate || ""}
+                      onChange={(e) => updateBill(bill.id, "dueDate", e.target.value)}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>Category</span>
+                    <input
+                      value={bill.category || ""}
+                      onChange={(e) => updateBill(bill.id, "category", e.target.value)}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>Priority</span>
+                    <select
+                      value={bill.priority || "Important"}
+                      onChange={(e) => updateBill(bill.id, "priority", e.target.value)}
+                    >
+                      <option value="Must pay">Must pay</option>
+                      <option value="Important">Important</option>
+                      <option value="Flexible">Flexible</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bills-side-panel">
+          <div className="column-head">
+            <span className="kicker">THIS WEEK</span>
+            <h3>Payment radar</h3>
+          </div>
+
+          <div className="delay-list">
+            {overdueBills.length === 0 && dueThisWeek.length === 0 ? (
+              <div className="mini-rule-card">
+                <span className="kicker">CLEAR</span>
+                <p>No unpaid bills are due this week.</p>
+              </div>
+            ) : (
+              [...overdueBills, ...dueThisWeek].map((bill) => (
+                <div className="delay-card" key={bill.id}>
+                  <strong>{bill.name}</strong>
+                  <span>{getBillDueLabel(bill)} · {currency(bill.amount)}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="mini-rule-card">
+            <span className="kicker">HOUSE RULE</span>
+            <p>Bills first. Shopping second. Savings push third. Flexible spending last.</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function getBills(state) {
+  return Array.isArray(state.bills) && state.bills.length ? state.bills : defaultBills;
+}
+
+function daysUntilBill(dateValue) {
+  if (!dateValue) return 999;
+
+  const today = new Date();
+  const target = new Date(dateValue);
+
+  if (Number.isNaN(target.getTime())) return 999;
+
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+
+  return Math.ceil((target - today) / 86400000);
+}
+
+function getBillDueLabel(bill) {
+  if (bill.paid) return "Paid";
+  if (bill.days < 0) return `Overdue by ${Math.abs(bill.days)} days`;
+  if (bill.days === 0) return "Due today";
+  if (bill.days === 1) return "Due tomorrow";
+  if (bill.days >= 999) return "No date set";
+  return `Due in ${bill.days} days`;
+}
+
+function getBillsRadarDecision(safeAfterBills, overdueBills, dueThisWeek, mustPayTotal) {
+  if (overdueBills.length > 0) {
+    return {
+      level: "red",
+      label: "PAY",
+      title: "Overdue bills need action",
+      message: "A bill is overdue. Sort this before shopping, savings pushes or flexible spending.",
+    };
+  }
+
+  if (safeAfterBills < 0) {
+    return {
+      level: "red",
+      label: "LOCK",
+      title: "Bills would break the month",
+      message: "Unpaid bills are higher than the current safe figure. Protect must-pay bills first.",
+    };
+  }
+
+  if (dueThisWeek.length > 0 || mustPayTotal > 0) {
+    return {
+      level: "amber",
+      label: "WATCH",
+      title: "Bills due soon",
+      message: "This week has bills due. Keep money protected until they are marked paid.",
+    };
+  }
+
+  return {
+    level: "green",
+    label: "CLEAR",
+    title: "Bills are under control",
+    message: "No urgent unpaid bills are showing. Keep the calendar updated before payday.",
+  };
+}
+
+function getBillsAdvice(safeAfterBills, overdueBills, dueThisWeek, unpaidTotal) {
+  if (overdueBills.length > 0) {
+    return `Fab honesty moment: ${overdueBills.length} bill is overdue. Pay or plan that first before anything flexible.`;
+  }
+
+  if (safeAfterBills < 0) {
+    return "This is tight, lovely. Unpaid bills are eating into safe money. Reduce shopping extras, subscriptions or flexible pots until bills are covered.";
+  }
+
+  if (dueThisWeek.length > 0) {
+    return `You have ${dueThisWeek.length} bill due this week. Keep that money protected and only spend what remains after bills.`;
+  }
+
+  return `Fabulous. Unpaid bills total ${currency(unpaidTotal)}, and the radar is not showing urgent pressure right now.`;
 }
 
 function ShoppingGuardPanel({ state, update, figures }) {
