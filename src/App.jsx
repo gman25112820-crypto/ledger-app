@@ -3,6 +3,15 @@ import "./App.css";
 
 const STORAGE_KEY = "ledger_v2_state";
 
+const defaultShoppingItems = [
+  { id: "milk-bread", name: "Milk, bread and basics", estimatedCost: 12, category: "Food", priority: "Essential", bought: false },
+  { id: "packed-lunch", name: "Packed lunch bits", estimatedCost: 18, category: "School", priority: "Essential", bought: false },
+  { id: "pet-food", name: "Pet food", estimatedCost: 22, category: "Pets", priority: "Essential", bought: false },
+  { id: "cleaning", name: "Cleaning supplies", estimatedCost: 15, category: "Home", priority: "Important", bought: false },
+  { id: "kids-treat", name: "Kids treat", estimatedCost: 8, category: "Family", priority: "Flexible", bought: false },
+  { id: "family-snacks", name: "Family snacks", estimatedCost: 14, category: "Food", priority: "Flexible", bought: false },
+];
+
 const defaultProtectedItems = [
   { id: "rent-home", name: "Rent / home payment", amount: 0, category: "Home", priority: 1 },
   { id: "council-tax", name: "Council tax", amount: 0, category: "Home", priority: 1 },
@@ -46,6 +55,7 @@ const defaultState = {
   debtPayment: 75,
 savingsPots: defaultSavingsPots,
   protectedItems: defaultProtectedItems,
+  shoppingItems: defaultShoppingItems,
 };
 
 function currency(value) {
@@ -132,7 +142,7 @@ export default function App() {
     setActiveTab("Home");
   };
 
-  const tabs = ["Home", "Budget", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
+  const tabs = ["Home", "Budget", "Shopping", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
 
   return (
     <div className="ledger-shell">
@@ -208,7 +218,10 @@ export default function App() {
             <GoalsPanel state={state} update={update} figures={figures} />
           )}
 
-          {activeTab === "Protected" && (
+          {activeTab === "Shopping" && (
+          <ShoppingGuardPanel state={state} update={update} figures={figures} />
+        )}
+        {activeTab === "Protected" && (
           <ProtectedMoneyPanel state={state} update={update} figures={figures} />
         )}
         {activeTab === "Savings" && (
@@ -361,6 +374,281 @@ function GoalsPanel({ state, update, figures }) {
       </div>
     </section>
   );
+}
+
+function ShoppingGuardPanel({ state, update, figures }) {
+  const shoppingItems = getShoppingItems(state);
+
+  const totalBasket = shoppingItems.reduce((sum, item) => sum + Number(item.estimatedCost || 0), 0);
+  const boughtTotal = shoppingItems
+    .filter((item) => item.bought)
+    .reduce((sum, item) => sum + Number(item.estimatedCost || 0), 0);
+  const remainingBasket = totalBasket - boughtTotal;
+  const essentialTotal = shoppingItems
+    .filter((item) => item.priority === "Essential")
+    .reduce((sum, item) => sum + Number(item.estimatedCost || 0), 0);
+  const flexibleTotal = shoppingItems
+    .filter((item) => item.priority === "Flexible")
+    .reduce((sum, item) => sum + Number(item.estimatedCost || 0), 0);
+
+  const safeAfterShop = Number(figures.safe || 0) - remainingBasket;
+  const decision = getShoppingDecision(safeAfterShop, essentialTotal, flexibleTotal, shoppingItems);
+
+  const updateShoppingItem = (id, key, value) => {
+    const next = shoppingItems.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            [key]: key === "estimatedCost" ? Number(value) : value,
+          }
+        : item
+    );
+
+    update("shoppingItems", next);
+  };
+
+  const addShoppingItem = () => {
+    const next = [
+      {
+        id: `shop-${Date.now()}`,
+        name: "New item",
+        estimatedCost: 0,
+        category: "General",
+        priority: "Important",
+        bought: false,
+      },
+      ...shoppingItems,
+    ];
+
+    update("shoppingItems", next);
+  };
+
+  const removeShoppingItem = (id) => {
+    update(
+      "shoppingItems",
+      shoppingItems.filter((item) => item.id !== id)
+    );
+  };
+
+  const resetShoppingList = () => {
+    update("shoppingItems", defaultShoppingItems);
+  };
+
+  return (
+    <>
+      <div className="section-title">
+        <div>
+          <span className="kicker">SHOPPING LIST + SPEND GUARD</span>
+          <h2>Check the basket before money leaves</h2>
+          <p>
+            What is happening: Ledger is estimating the shop before checkout.
+            What it means: essentials, important items and flexible extras are separated.
+            What to do next: buy essentials first, delay flexible extras if safe-after-shop is tight.
+          </p>
+        </div>
+        <div className={`safe-pill small ${safeAfterShop < 0 ? "danger" : ""}`}>
+          <span>Safe after shop</span>
+          <strong>{currency(safeAfterShop)}</strong>
+        </div>
+      </div>
+
+      <div className="shopping-decision-card">
+        <div>
+          <span className="kicker">LEDGE DECISION</span>
+          <h3>{decision.title}</h3>
+          <p>{decision.message}</p>
+        </div>
+        <div className={`shopping-light ${decision.level}`}>
+          {decision.label}
+        </div>
+      </div>
+
+      <div className="metric-grid compact">
+        <Metric title="Basket estimate" value={currency(totalBasket)} />
+        <Metric title="Remaining shop" value={currency(remainingBasket)} />
+        <Metric title="Essentials" value={currency(essentialTotal)} />
+        <Metric title="Flexible extras" value={currency(flexibleTotal)} />
+      </div>
+
+      <div className="shopping-actions">
+        <button className="primary-action" onClick={addShoppingItem}>
+          Add shopping item
+        </button>
+        <button className="ghost-action" onClick={resetShoppingList}>
+          Reset demo list
+        </button>
+      </div>
+
+      <div className="panel shopping-advice">
+        <span className="kicker">PENNY SHOPPING ADVICE ✨</span>
+        <p>{getShoppingAdvice(safeAfterShop, remainingBasket, flexibleTotal)}</p>
+      </div>
+
+      <div className="shopping-layout">
+        <div className="shopping-list-panel">
+          <div className="column-head">
+            <span className="kicker">SHOPPING LIST</span>
+            <h3>Basket control</h3>
+          </div>
+
+          <div className="shopping-list">
+            {shoppingItems.map((item) => (
+              <div className={`shopping-item-card ${item.bought ? "bought" : ""}`} key={item.id}>
+                <div className="shopping-item-top">
+                  <label className="shopping-check">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(item.bought)}
+                      onChange={(e) => updateShoppingItem(item.id, "bought", e.target.checked)}
+                    />
+                    <span>{item.bought ? "Bought" : "Needed"}</span>
+                  </label>
+
+                  <button className="remove-mini" onClick={() => removeShoppingItem(item.id)}>
+                    Remove
+                  </button>
+                </div>
+
+                <div className="shopping-edit-grid">
+                  <label className="field">
+                    <span>Item</span>
+                    <input
+                      value={item.name || ""}
+                      onChange={(e) => updateShoppingItem(item.id, "name", e.target.value)}
+                    />
+                  </label>
+
+                  <NumberInput
+                    label="Estimated cost"
+                    value={item.estimatedCost}
+                    onChange={(v) => updateShoppingItem(item.id, "estimatedCost", v)}
+                  />
+
+                  <label className="field">
+                    <span>Category</span>
+                    <input
+                      value={item.category || ""}
+                      onChange={(e) => updateShoppingItem(item.id, "category", e.target.value)}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>Priority</span>
+                    <select
+                      value={item.priority || "Important"}
+                      onChange={(e) => updateShoppingItem(item.id, "priority", e.target.value)}
+                    >
+                      <option value="Essential">Essential</option>
+                      <option value="Important">Important</option>
+                      <option value="Flexible">Flexible</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="shopping-side-panel">
+          <div className="column-head">
+            <span className="kicker">DELAY SUGGESTIONS</span>
+            <h3>What to push back</h3>
+          </div>
+
+          <div className="delay-list">
+            {getDelaySuggestions(shoppingItems, safeAfterShop).map((item) => (
+              <div className="delay-card" key={item.id}>
+                <strong>{item.name}</strong>
+                <span>{item.priority} · {currency(item.estimatedCost)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mini-rule-card">
+            <span className="kicker">HOUSE RULE</span>
+            <p>
+              Essentials first. Important second. Flexible extras only if safe-after-shop stays positive.
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function getShoppingItems(state) {
+  return Array.isArray(state.shoppingItems) && state.shoppingItems.length
+    ? state.shoppingItems
+    : defaultShoppingItems;
+}
+
+function getShoppingDecision(safeAfterShop, essentialTotal, flexibleTotal, shoppingItems) {
+  const remainingItems = shoppingItems.filter((item) => !item.bought);
+
+  if (safeAfterShop < 0) {
+    return {
+      level: "red",
+      label: "STOP",
+      title: "Basket is over the safe limit",
+      message: "This shop would eat into protected money. Buy essentials only and delay flexible extras.",
+    };
+  }
+
+  if (safeAfterShop < 50 || flexibleTotal > essentialTotal) {
+    return {
+      level: "amber",
+      label: "TRIM",
+      title: "Shop is possible but needs trimming",
+      message: "Essentials look manageable, but flexible extras should be checked before checkout.",
+    };
+  }
+
+  if (remainingItems.length === 0) {
+    return {
+      level: "green",
+      label: "DONE",
+      title: "Shopping list completed",
+      message: "All items are marked as bought. Update the list before the next shop.",
+    };
+  }
+
+  return {
+    level: "green",
+    label: "BUY",
+    title: "Basket looks safe",
+    message: "The estimated shop fits inside the current safe-to-spend figure.",
+  };
+}
+
+function getShoppingAdvice(safeAfterShop, remainingBasket, flexibleTotal) {
+  if (safeAfterShop < 0) {
+    return "Fab honesty moment: do not treat the whole basket as safe. Keep food, school and pets first. Delay treats and extras.";
+  }
+
+  if (safeAfterShop < 50) {
+    return "This is tight, lovely. Take the list, but check prices as you go and keep flexible extras as optional.";
+  }
+
+  if (flexibleTotal > 0) {
+    return `Fabulous. You can plan the shop, but remember ${currency(flexibleTotal)} is flexible and can be delayed if prices are higher than expected.`;
+  }
+
+  return `Nice and clean. The remaining shop is ${currency(remainingBasket)} and it is mostly essential.`;
+}
+
+function getDelaySuggestions(shoppingItems, safeAfterShop) {
+  const flexible = shoppingItems
+    .filter((item) => !item.bought && item.priority === "Flexible")
+    .sort((a, b) => Number(b.estimatedCost || 0) - Number(a.estimatedCost || 0));
+
+  const important = shoppingItems
+    .filter((item) => !item.bought && item.priority === "Important")
+    .sort((a, b) => Number(b.estimatedCost || 0) - Number(a.estimatedCost || 0));
+
+  if (safeAfterShop < 0) return [...flexible, ...important].slice(0, 5);
+  if (safeAfterShop < 50) return flexible.slice(0, 5);
+
+  return flexible.slice(0, 3);
 }
 
 function ProtectedMoneyPanel({ state, update, figures }) {
