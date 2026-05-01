@@ -1,364 +1,569 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
-const SAFETY_KEY = "ledgerSafetySeen";
-const DATA_KEY = "ledgerDataFinal";
+const STORAGE_KEY = "ledger_v2_state";
 
-const defaultData = {
+const defaultState = {
   income: 1500,
   spent: 920,
-  unpaid: 180,
-  payday: 28,
-  saved: 450,
-  savingsGoal: 2000,
+  unpaidBills: 180,
+  paydayDays: 28,
+  goalName: "Emergency buffer",
+  goalSaved: 450,
+  goalTarget: 2000,
+  kidsStars: 12,
+  familyPot: 35,
+  weeklyFood: 80,
+  fuelTravel: 45,
+  subscriptions: 28,
+  debtPayment: 75,
 };
 
-function money(value) {
-  const n = Number(value || 0);
-  return n < 0 ? `£-${Math.abs(n).toLocaleString()}` : `£${n.toLocaleString()}`;
+function currency(value) {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
 }
 
-function getDecision(safe) {
-  if (safe < 0) return ["Danger zone", "Teds", "🔴", "Freeze extras and protect bills first."];
-  if (safe < 250) return ["Careful mode", "Penny", "🟠", "Set a small daily spend limit until payday."];
-  return ["Stable", "Ledge", "🟢", "You’re in control. Keep building momentum."];
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 export default function App() {
-  const [showSafety, setShowSafety] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [tab, setTab] = useState("home");
-
-  const [data, setData] = useState(() => {
+  const [activeTab, setActiveTab] = useState("Home");
+  const [editOpen, setEditOpen] = useState(false);
+  const [safetyOpen, setSafetyOpen] = useState(false);
+  const [state, setState] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem(DATA_KEY)) || defaultData;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? { ...defaultState, ...JSON.parse(saved) } : defaultState;
     } catch {
-      return defaultData;
+      return defaultState;
     }
   });
 
-  const [form, setForm] = useState(data);
-
   useEffect(() => {
-    if (localStorage.getItem(SAFETY_KEY) !== "true") {
-      setShowSafety(true);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  const figures = useMemo(() => {
+    const safe = state.income - state.spent - state.unpaidBills;
+    const essentials =
+      state.unpaidBills +
+      state.weeklyFood +
+      state.fuelTravel +
+      state.subscriptions +
+      state.debtPayment;
+
+    const goalProgress = clamp(
+      Math.round((state.goalSaved / Math.max(state.goalTarget, 1)) * 100),
+      0,
+      100
+    );
+
+    let status = "Stable";
+    let statusTone = "good";
+    let message = "You’re in control. Keep building momentum.";
+
+    if (safe < 0) {
+      status = "Pressure";
+      statusTone = "danger";
+      message = "Spending is above the current plan. Protect essentials first.";
+    } else if (safe < 150) {
+      status = "Careful";
+      statusTone = "warn";
+      message = "Keep spending tight until payday. Small decisions matter.";
+    } else if (safe > 500) {
+      status = "Strong";
+      statusTone = "great";
+      message = "Good breathing room. Push some extra money toward your goal.";
     }
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(DATA_KEY, JSON.stringify(data));
-  }, [data]);
+    return {
+      safe,
+      essentials,
+      goalProgress,
+      status,
+      statusTone,
+      message,
+    };
+  }, [state]);
 
-  const safe = useMemo(() => {
-    return Number(data.income || 0) - Number(data.spent || 0) - Number(data.unpaid || 0);
-  }, [data]);
+  const update = (key, value) => {
+    setState((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
-  const progress = Math.min(
-    100,
-    Math.round((Number(data.saved || 0) / Math.max(1, Number(data.savingsGoal || 1))) * 100)
-  );
+  const resetDemo = () => {
+    setState(defaultState);
+    setActiveTab("Home");
+  };
 
-  const [mood, leader, icon, action] = getDecision(safe);
-
-  function clean(field, value) {
-    const fixed = value.replace(/^0+(?=\d)/, "");
-    setForm({ ...form, [field]: fixed === "" ? "" : Number(fixed) });
-  }
-
-  function saveFigures() {
-    setData({
-      income: Number(form.income) || 0,
-      spent: Number(form.spent) || 0,
-      unpaid: Number(form.unpaid) || 0,
-      payday: Number(form.payday) || 0,
-      saved: Number(form.saved) || 0,
-      savingsGoal: Number(form.savingsGoal) || 0,
-    });
-    setEditing(false);
-  }
+  const tabs = ["Home", "Budget", "Goals", "Penny", "Family", "Plan"];
 
   return (
-    <div className="min-h-screen bg-[#050510] text-white">
-      {showSafety && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-5 backdrop-blur-md">
-          <div className="max-w-lg rounded-[32px] border border-white/15 bg-[#111126] p-6 shadow-2xl">
-            <div className="text-xs font-black uppercase tracking-[0.3em] text-yellow-300">
-              Safety First
-            </div>
-            <h1 className="mt-3 text-3xl font-black">Welcome to Ledger</h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/70">
-              Ledger is a local finance planning tool. It is not connected to your bank and is not a secure vault.
-            </p>
-            <div className="mt-4 rounded-2xl border border-yellow-300/30 bg-yellow-400/10 p-4 text-sm text-yellow-100">
-              Do not enter bank logins, card numbers, security codes, passwords, or sensitive financial credentials.
-            </div>
-            <div className="mt-4 rounded-2xl bg-white/[0.06] p-4 text-sm text-white/70">
-              Your data is stored only on this browser/device. There are no accounts, backend, or cloud sync yet.
-            </div>
-            <button
-              onClick={() => {
-                localStorage.setItem(SAFETY_KEY, "true");
-                setShowSafety(false);
-              }}
-              className="mt-5 w-full rounded-2xl bg-violet-600 p-4 font-black"
-            >
-              Continue safely
+    <div className="ledger-shell">
+      <div className="app-frame">
+        <header className="hero">
+          <div>
+            <div className="kicker">LEDGER</div>
+            <h1>Decision OS</h1>
+            <p>Local money planning with Ledge, Penny, Eddie and Teds.</p>
+          </div>
+
+          <div className="hero-actions">
+            <button className="ghost-btn" onClick={() => setSafetyOpen(true)}>
+              Safety
+            </button>
+            <button className="primary-btn" onClick={() => setEditOpen(true)}>
+              Edit figures
             </button>
           </div>
+        </header>
+
+        <div className="demo-banner">
+          <span className="dot gold" />
+          Local Demo Mode · Data stays on this device · No bank connection
         </div>
-      )}
 
-      <main className="mx-auto min-h-screen w-full max-w-md px-5 py-6 lg:max-w-6xl">
-        <section className="rounded-[36px] border border-white/10 bg-gradient-to-br from-violet-950/70 via-slate-950 to-black p-6 shadow-2xl shadow-black/50">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.35em] text-violet-300">Ledger</div>
-              <h1 className="mt-2 text-4xl font-black">Decision OS</h1>
-              <p className="mt-2 text-sm text-white/55">
-                Local money planning with Ledge, Penny, Eddie and Teds.
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={() => setShowSafety(true)} className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-black">
-                Safety
-              </button>
-              <button
-                onClick={() => {
-                  setForm(data);
-                  setEditing(true);
-                }}
-                className="rounded-2xl bg-violet-600 px-5 py-3 text-sm font-black shadow-lg shadow-violet-900/40"
-              >
-                Edit figures
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-yellow-300/25 bg-yellow-400/10 p-3 text-sm font-bold text-yellow-100">
-            🟡 Local Demo Mode · Data stays on this device · No bank connection
-          </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-            <Panel>
-              <Label>Decision Engine</Label>
-              <div className="mt-3 flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-black">{icon} {leader}: {mood}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-white/65">{action}</p>
-                </div>
-                <div className="rounded-3xl bg-black/30 px-5 py-4 text-center">
-                  <div className="text-xs text-white/40">Safe</div>
-                  <div className={safe < 0 ? "text-2xl font-black text-red-300" : "text-2xl font-black text-emerald-300"}>
-                    {money(safe)}
-                  </div>
-                </div>
+        <section className="top-grid">
+          <div className="decision-card">
+            <div className="kicker">DECISION ENGINE</div>
+            <div className="decision-row">
+              <div>
+                <h2>
+                  <span className={`status-light ${figures.statusTone}`} />
+                  Ledge: {figures.status}
+                </h2>
+                <p>{figures.message}</p>
               </div>
-            </Panel>
+              <div className="safe-pill">
+                <span>Safe</span>
+                <strong>{currency(figures.safe)}</strong>
+              </div>
+            </div>
+          </div>
 
-            <Panel>
-              <Label>Penny Today ✨</Label>
-              <p className="mt-3 text-sm leading-relaxed text-white/70">
-                {safe < 0
-                  ? "You’re over the line, but we’ll sort it step by step — fab and steady."
-                  : "You’re doing fab. Keep one eye on bills and one eye on your next goal."}
-              </p>
-            </Panel>
+          <div className="penny-card">
+            <div className="kicker">PENNY TODAY ✨</div>
+            <p>{getPennyLine(figures, state)}</p>
           </div>
         </section>
 
-        {editing && (
-          <section className="mt-5 rounded-[32px] border border-violet-300/20 bg-[#141425] p-5 shadow-2xl">
-            <h2 className="text-2xl font-black">Edit money figures</h2>
-            <p className="mt-1 text-sm text-white/50">Clean inputs. No leading-zero issue.</p>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                ["income", "Monthly income"],
-                ["spent", "Spent so far"],
-                ["unpaid", "Unpaid bills"],
-                ["payday", "Payday countdown"],
-                ["saved", "Saved toward goal"],
-                ["savingsGoal", "Savings goal"],
-              ].map(([field, label]) => (
-                <label key={field} className="block rounded-2xl bg-white/[0.06] p-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white/40">{label}</span>
-                  <input
-                    type="number"
-                    value={form[field] ?? ""}
-                    onChange={(e) => clean(field, e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 p-3 text-white outline-none focus:border-violet-400"
-                  />
-                </label>
-              ))}
-            </div>
-
-            <div className="mt-5 flex gap-3">
-              <button onClick={saveFigures} className="flex-1 rounded-2xl bg-emerald-600 p-4 font-black">Save</button>
-              <button onClick={() => setEditing(false)} className="flex-1 rounded-2xl bg-white/10 p-4 font-black">Cancel</button>
-            </div>
-          </section>
-        )}
-
-        <nav className="mt-5 grid grid-cols-3 gap-2 rounded-[28px] border border-white/10 bg-white/[0.05] p-2 lg:grid-cols-6">
-          {["home", "budget", "goals", "penny", "family", "plan"].map((item) => (
+        <nav className="tabs">
+          {tabs.map((tab) => (
             <button
-              key={item}
-              onClick={() => setTab(item)}
-              className={`rounded-2xl px-3 py-3 text-sm font-black capitalize ${
-                tab === item ? "bg-violet-600 text-white" : "text-white/50"
-              }`}
+              key={tab}
+              className={activeTab === tab ? "tab active" : "tab"}
+              onClick={() => setActiveTab(tab)}
             >
-              {item}
+              {tab}
             </button>
           ))}
         </nav>
 
-        <section className="mt-5">
-          {tab === "home" && (
-            <>
-              <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Metric title="Income" value={money(data.income)} />
-                <Metric title="Spent" value={money(data.spent)} danger={data.spent > data.income} />
-                <Metric title="Unpaid bills" value={money(data.unpaid)} />
-                <Metric title="Payday" value={`${data.payday}d`} />
-              </section>
-
-              <section className="mt-5 grid gap-4 lg:grid-cols-2">
-                <Panel>
-                  <Label>Goal Progress</Label>
-                  <div className="mt-4 flex justify-between text-sm text-white/60">
-                    <span>{money(data.saved)}</span>
-                    <span>{money(data.savingsGoal)}</span>
-                  </div>
-                  <div className="mt-3 h-4 rounded-full bg-black/30">
-                    <div className="h-4 rounded-full bg-violet-500" style={{ width: `${progress}%` }} />
-                  </div>
-                  <p className="mt-3 text-sm text-white/50">{progress}% complete</p>
-                </Panel>
-
-                <Panel>
-                  <Label>Team Insight</Label>
-                  <div className="mt-4 space-y-3 text-sm text-white/70">
-                    <p>🧾 Ledge: Keep the plan simple and practical.</p>
-                    <p>📊 Eddie: Safe-to-spend is {money(safe)} after spending and unpaid bills.</p>
-                    <p>⚠️ Teds: Local demo mode only. No sensitive details.</p>
-                  </div>
-                </Panel>
-              </section>
-            </>
+        <main>
+          {activeTab === "Home" && (
+            <HomePanel state={state} figures={figures} />
           )}
 
-          {tab === "budget" && (
-            <Panel>
-              <Label>Budget Snapshot</Label>
-              <div className="mt-4 space-y-3 text-sm text-white/70">
-                <p>Income: {money(data.income)}</p>
-                <p>Spent: {money(data.spent)}</p>
-                <p>Unpaid bills: {money(data.unpaid)}</p>
-                <p className="font-black text-emerald-300">Safe-to-spend: {money(safe)}</p>
-              </div>
-            </Panel>
+          {activeTab === "Budget" && (
+            <BudgetPanel state={state} update={update} figures={figures} />
           )}
 
-          {tab === "goals" && (
-            <Panel>
-              <Label>Goals</Label>
-              <h2 className="mt-3 text-2xl font-black">Main savings goal</h2>
-              <p className="mt-2 text-white/60">{money(data.saved)} saved of {money(data.savingsGoal)}</p>
-              <div className="mt-4 h-5 rounded-full bg-black/30">
-                <div className="h-5 rounded-full bg-violet-500" style={{ width: `${progress}%` }} />
-              </div>
-              <p className="mt-3 text-sm text-white/50">Penny says: “Tiny steps still count — fab progress.”</p>
-            </Panel>
+          {activeTab === "Goals" && (
+            <GoalsPanel state={state} update={update} figures={figures} />
           )}
 
-          {tab === "penny" && (
-            <Panel>
-              <Label>Penny Chat</Label>
-              <h2 className="mt-3 text-2xl font-black">Today’s guidance</h2>
-              <p className="mt-3 text-white/70">
-                {safe < 0
-                  ? "Careful mode today. Freeze extras, protect bills, then reset calmly."
-                  : "You’ve got room to breathe. Keep it balanced and avoid surprise spending."}
-              </p>
-              <p className="mt-4 rounded-2xl bg-white/[0.06] p-4 text-sm text-white/65">
-                “Look after the pennies, and the pounds look after themselves.”
-              </p>
-            </Panel>
+          {activeTab === "Penny" && (
+            <PennyPanel state={state} figures={figures} />
           )}
 
-          {tab === "family" && (
-            <Panel>
-              <Label>Family</Label>
-              <h2 className="mt-3 text-2xl font-black">Money learning</h2>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <Mini title="Little Learner" text="Ages 4–7 · coins, choices and patience." />
-                <Mini title="Money Explorer" text="Ages 8–12 · saving, spending and goals." />
-                <Mini title="Teen Builder" text="Ages 13–17 · budgeting and responsibility." />
-              </div>
-            </Panel>
+          {activeTab === "Family" && (
+            <FamilyPanel state={state} update={update} />
           )}
 
-          {tab === "plan" && (
-            <div className="grid gap-4 lg:grid-cols-2">
-              <Panel>
-                <Label>Plan</Label>
-                <h2 className="mt-3 text-2xl font-black">Next best move</h2>
-                <p className="mt-3 text-white/70">
-                  {safe < 0 ? "Reduce spending today and protect essential bills." : "Keep bills covered and move a little toward your goal."}
-                </p>
-              </Panel>
-
-              <Panel>
-                <Label>Privacy & Safety</Label>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">
-                  Ledger is currently local only. No accounts, no bank connection, no secure cloud sync yet.
-                </p>
-                <p className="mt-3 text-sm font-bold text-yellow-100">
-                  Do not enter bank details, card numbers, passwords, or security codes.
-                </p>
-              </Panel>
-            </div>
+          {activeTab === "Plan" && (
+            <PlanPanel state={state} figures={figures} resetDemo={resetDemo} />
           )}
-        </section>
-      </main>
+        </main>
+      </div>
+
+      {editOpen && (
+        <EditModal
+          state={state}
+          update={update}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
+
+      {safetyOpen && <SafetyModal onClose={() => setSafetyOpen(false)} />}
     </div>
   );
 }
 
-function Panel({ children }) {
+function HomePanel({ state, figures }) {
   return (
-    <section className="rounded-[30px] border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-black/20">
-      {children}
+    <>
+      <section className="metric-grid">
+        <Metric title="Income" value={currency(state.income)} />
+        <Metric title="Spent" value={currency(state.spent)} />
+        <Metric title="Unpaid bills" value={currency(state.unpaidBills)} />
+        <Metric title="Payday" value={`${state.paydayDays}d`} />
+      </section>
+
+      <section className="content-grid">
+        <div className="panel">
+          <div className="kicker">GOAL PROGRESS</div>
+          <div className="goal-line">
+            <span>{currency(state.goalSaved)}</span>
+            <span>{currency(state.goalTarget)}</span>
+          </div>
+          <div className="progress-track">
+            <div style={{ width: `${figures.goalProgress}%` }} />
+          </div>
+          <p>{figures.goalProgress}% complete</p>
+        </div>
+
+        <div className="panel">
+          <div className="kicker">TEAM INSIGHT</div>
+          <ul className="insight-list">
+            <li>🧾 Ledge: Keep the plan simple and practical.</li>
+            <li>
+              📊 Eddie: Safe-to-spend is {currency(figures.safe)} after spending
+              and unpaid bills.
+            </li>
+            <li>⚠️ Teds: Local demo mode only. No sensitive details.</li>
+          </ul>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function BudgetPanel({ state, update, figures }) {
+  return (
+    <section className="page-grid">
+      <div className="panel wide">
+        <div className="section-title">
+          <div>
+            <div className="kicker">BUDGET CONTROL</div>
+            <h2>Make the numbers editable and useful.</h2>
+          </div>
+          <div className="safe-pill small">
+            <span>Safe</span>
+            <strong>{currency(figures.safe)}</strong>
+          </div>
+        </div>
+
+        <div className="input-grid">
+          <NumberInput label="Monthly income" value={state.income} onChange={(v) => update("income", v)} />
+          <NumberInput label="Spent so far" value={state.spent} onChange={(v) => update("spent", v)} />
+          <NumberInput label="Unpaid bills" value={state.unpaidBills} onChange={(v) => update("unpaidBills", v)} />
+          <NumberInput label="Days until payday" value={state.paydayDays} onChange={(v) => update("paydayDays", v)} />
+          <NumberInput label="Food / household" value={state.weeklyFood} onChange={(v) => update("weeklyFood", v)} />
+          <NumberInput label="Fuel / travel" value={state.fuelTravel} onChange={(v) => update("fuelTravel", v)} />
+          <NumberInput label="Subscriptions" value={state.subscriptions} onChange={(v) => update("subscriptions", v)} />
+          <NumberInput label="Debt payment" value={state.debtPayment} onChange={(v) => update("debtPayment", v)} />
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="kicker">BILLS SNAPSHOT</div>
+        <ul className="bill-list">
+          <li><span>Unpaid bills</span><strong>{currency(state.unpaidBills)}</strong></li>
+          <li><span>Food estimate</span><strong>{currency(state.weeklyFood)}</strong></li>
+          <li><span>Fuel / travel</span><strong>{currency(state.fuelTravel)}</strong></li>
+          <li><span>Subscriptions</span><strong>{currency(state.subscriptions)}</strong></li>
+          <li><span>Debt payment</span><strong>{currency(state.debtPayment)}</strong></li>
+        </ul>
+      </div>
     </section>
   );
 }
 
-function Metric({ title, value, danger }) {
+function GoalsPanel({ state, update, figures }) {
+  const remaining = Math.max(0, state.goalTarget - state.goalSaved);
+
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-black/20">
-      <div className="text-xs font-bold uppercase tracking-wider text-white/40">{title}</div>
-      <div className={danger ? "mt-2 text-3xl font-black text-red-300" : "mt-2 text-3xl font-black text-white"}>
-        {value}
+    <section className="page-grid">
+      <div className="panel wide">
+        <div className="section-title">
+          <div>
+            <div className="kicker">GOALS</div>
+            <h2>{state.goalName}</h2>
+          </div>
+          <strong className="big-percent">{figures.goalProgress}%</strong>
+        </div>
+
+        <div className="progress-track large">
+          <div style={{ width: `${figures.goalProgress}%` }} />
+        </div>
+
+        <div className="metric-grid compact">
+          <Metric title="Saved" value={currency(state.goalSaved)} />
+          <Metric title="Target" value={currency(state.goalTarget)} />
+          <Metric title="Remaining" value={currency(remaining)} />
+        </div>
+
+        <div className="input-grid">
+          <TextInput label="Goal name" value={state.goalName} onChange={(v) => update("goalName", v)} />
+          <NumberInput label="Saved so far" value={state.goalSaved} onChange={(v) => update("goalSaved", v)} />
+          <NumberInput label="Goal target" value={state.goalTarget} onChange={(v) => update("goalTarget", v)} />
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="kicker">PENNY GOAL ADVICE</div>
+        <p>
+          Fab goal building. If safe-to-spend stays positive, move a small amount
+          into the goal before the month disappears.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function PennyPanel({ state, figures }) {
+  const lines = [
+    `Safe-to-spend is ${currency(figures.safe)}.`,
+    `Goal progress is ${figures.goalProgress}%.`,
+    `Payday is in ${state.paydayDays} days.`,
+    `Current state is ${figures.status}.`,
+  ];
+
+  return (
+    <section className="content-grid">
+      <div className="panel">
+        <div className="kicker">PENNY CHAT</div>
+        <h2>Friendly guidance, not financial advice.</h2>
+        <div className="chat-card">
+          <strong>Penny ✨</strong>
+          <p>{getPennyLine(figures, state)}</p>
+        </div>
+        <div className="chat-card muted">
+          <strong>Ledge</strong>
+          <p>
+            Keep decisions practical: essentials first, then goals, then flexible
+            spending.
+          </p>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="kicker">WHAT PENNY KNOWS</div>
+        <ul className="insight-list">
+          {lines.map((line) => (
+            <li key={line}>✨ {line}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function FamilyPanel({ state, update }) {
+  return (
+    <section className="page-grid">
+      <div className="panel wide">
+        <div className="section-title">
+          <div>
+            <div className="kicker">FAMILY MONEY</div>
+            <h2>Kids learning zones</h2>
+          </div>
+          <div className="safe-pill small">
+            <span>Stars</span>
+            <strong>{state.kidsStars}</strong>
+          </div>
+        </div>
+
+        <div className="family-grid">
+          <FamilyCard
+            title="Little Learner"
+            age="4–7"
+            text="Coins, jars, simple choices and reward stars."
+          />
+          <FamilyCard
+            title="Money Explorer"
+            age="8–12"
+            text="Wants vs needs, saving goals and pocket money habits."
+          />
+          <FamilyCard
+            title="Teen Builder"
+            age="13–17"
+            text="Budgeting, responsibility, planning and real-world choices."
+          />
+        </div>
+
+        <div className="input-grid">
+          <NumberInput label="Family pot" value={state.familyPot} onChange={(v) => update("familyPot", v)} />
+          <NumberInput label="Kids stars" value={state.kidsStars} onChange={(v) => update("kidsStars", v)} />
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="kicker">PARENT SNAPSHOT</div>
+        <p>
+          Current family pot: <strong>{currency(state.familyPot)}</strong>
+        </p>
+        <p>
+          Simple rule: split money into <strong>spend</strong>,{" "}
+          <strong>save</strong> and <strong>share</strong>.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function PlanPanel({ state, figures, resetDemo }) {
+  return (
+    <section className="content-grid">
+      <div className="panel">
+        <div className="kicker">THIS WEEK PLAN</div>
+        <h2>Next best money moves</h2>
+        <ol className="plan-list">
+          <li>Protect unpaid bills: {currency(state.unpaidBills)}.</li>
+          <li>Keep weekly food around {currency(state.weeklyFood)}.</li>
+          <li>Review subscriptions before payday.</li>
+          <li>Send a small amount toward {state.goalName} if safe remains positive.</li>
+          <li>Keep demo mode visible until accounts and backend are added.</li>
+        </ol>
+      </div>
+
+      <div className="panel">
+        <div className="kicker">SYSTEM STATUS</div>
+        <ul className="bill-list">
+          <li><span>Live deployment</span><strong>Active</strong></li>
+          <li><span>Data mode</span><strong>Local</strong></li>
+          <li><span>Bank connection</span><strong>None</strong></li>
+          <li><span>Decision engine</span><strong>{figures.status}</strong></li>
+        </ul>
+
+        <button className="danger-btn" onClick={resetDemo}>
+          Reset demo data
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function EditModal({ state, update, onClose }) {
+  return (
+    <div className="modal-backdrop">
+      <div className="modal">
+        <div className="section-title">
+          <div>
+            <div className="kicker">EDIT FIGURES</div>
+            <h2>Update Ledger numbers</h2>
+          </div>
+          <button className="ghost-btn" onClick={onClose}>Close</button>
+        </div>
+
+        <div className="input-grid">
+          <NumberInput label="Income" value={state.income} onChange={(v) => update("income", v)} />
+          <NumberInput label="Spent" value={state.spent} onChange={(v) => update("spent", v)} />
+          <NumberInput label="Unpaid bills" value={state.unpaidBills} onChange={(v) => update("unpaidBills", v)} />
+          <NumberInput label="Payday days" value={state.paydayDays} onChange={(v) => update("paydayDays", v)} />
+          <NumberInput label="Goal saved" value={state.goalSaved} onChange={(v) => update("goalSaved", v)} />
+          <NumberInput label="Goal target" value={state.goalTarget} onChange={(v) => update("goalTarget", v)} />
+        </div>
       </div>
     </div>
   );
 }
 
-function Mini({ title, text }) {
+function SafetyModal({ onClose }) {
   return (
-    <div className="rounded-2xl bg-white/[0.06] p-4">
-      <div className="font-black">{title}</div>
-      <p className="mt-2 text-sm text-white/60">{text}</p>
+    <div className="modal-backdrop">
+      <div className="modal">
+        <div className="section-title">
+          <div>
+            <div className="kicker">SAFETY</div>
+            <h2>Privacy & demo mode</h2>
+          </div>
+          <button className="ghost-btn" onClick={onClose}>Close</button>
+        </div>
+
+        <div className="safety-copy">
+          <p>
+            Ledger is currently an early-access local demo. It is not connected
+            to your bank and does not store data on a secure backend yet.
+          </p>
+          <p>
+            Do not enter bank logins, card details, passwords, national insurance
+            numbers or sensitive financial information.
+          </p>
+          <p>
+            The next production step is accounts, database sync and protected
+            user data.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
 
-function Label({ children }) {
+function Metric({ title, value }) {
   return (
-    <div className="text-xs font-black uppercase tracking-[0.3em] text-violet-200">
-      {children}
+    <div className="metric-card">
+      <span>{title}</span>
+      <strong>{value}</strong>
     </div>
   );
+}
+
+function FamilyCard({ title, age, text }) {
+  return (
+    <div className="family-card">
+      <span>{age}</span>
+      <h3>{title}</h3>
+      <p>{text}</p>
+    </div>
+  );
+}
+
+function NumberInput({ label, value, onChange }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+    </label>
+  );
+}
+
+function TextInput({ label, value, onChange }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </label>
+  );
+}
+
+function getPennyLine(figures, state) {
+  if (figures.safe < 0) {
+    return "Careful, lovely. Essentials first today. No panic, just tighten the plan.";
+  }
+
+  if (figures.safe < 150) {
+    return "You’re doing fab, but keep one eye on bills and one eye on payday.";
+  }
+
+  if (figures.goalProgress >= 50) {
+    return `Fabulous. ${state.goalName} is moving nicely. Keep the little wins coming.`;
+  }
+
+  return "You’re doing fab. Keep one eye on bills and one eye on your next goal.";
 }
