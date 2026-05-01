@@ -164,7 +164,7 @@ export default function App() {
     setActiveTab("Home");
   };
 
-  const tabs = ["Home", "Budget", "Bills", "Shopping", "Watchtower", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
+  const tabs = ["Home","Budget","Bills","Shopping","Watchtower","Protected","Goals","Savings","Penny","Family","Plan"];
 
   return (
     <div className="ledger-shell">
@@ -313,6 +313,24 @@ function CommandModuleDock({ activeTab, setActiveTab }) {
       </div>
     </div>
   );
+}
+
+
+function getLedgerTabIcon(tab) {
+  const icons = {
+  "Home": "⌂",
+  "Budget": "▣",
+  "Bills": "📅",
+  "Shopping": "🛒",
+  "Watchtower": "🛡",
+  "Protected": "🔒",
+  "Goals": "◎",
+  "Savings": "🏦",
+  "Penny": "○",
+  "Family": "♚",
+  "Plan": "✓"
+};
+  return icons[tab] || "•";
 }
 
 function HomePanel({ state, figures }) {
@@ -1624,6 +1642,21 @@ function NumberInput({ label, value, onChange }) {
     <label className="field">
       <span>{label}</span>
       
+      
+      <div className="forced-ledger-nav-v407">
+        {tabs.map((tab) => (
+          <button
+            type="button"
+            key={tab}
+            className={`forced-ledger-nav-button-v407 ${activeTab === tab ? "active" : ""}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            <span>{getLedgerTabIcon(tab)}</span>
+            <strong>{tab}</strong>
+          </button>
+        ))}
+      </div>
+
       <nav className="mobile-nav">
         {["Home", "Budget", "Goals", "Penny", "Plan"].map((tab) => (
           <button

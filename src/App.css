@@ -1444,3 +1444,77 @@ nav.bottom-nav button {
     min-height: auto;
   }
 }
+
+
+/* Ledger v4.0.7 Force Full Bottom Navigation */
+.forced-ledger-nav-v407 {
+  position: sticky;
+  top: 8px;
+  z-index: 80;
+  margin: 12px 0 16px;
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border: 1px solid rgba(168, 85, 255, 0.32);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(168, 85, 255, 0.22), transparent 36%),
+    rgba(10, 8, 24, 0.92);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+  scrollbar-width: thin;
+}
+
+.forced-ledger-nav-v407::-webkit-scrollbar {
+  height: 4px;
+}
+
+.forced-ledger-nav-v407::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+}
+
+.forced-ledger-nav-button-v407 {
+  min-width: 92px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  padding: 10px 8px;
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.045);
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  place-items: center;
+  font-weight: 900;
+}
+
+.forced-ledger-nav-button-v407 span {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.forced-ledger-nav-button-v407 strong {
+  font-size: 11px;
+}
+
+.forced-ledger-nav-button-v407.active {
+  color: white;
+  border-color: rgba(139, 92, 246, 0.7);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(124, 58, 237, 0.7));
+  box-shadow: 0 12px 28px rgba(139, 92, 246, 0.3);
+}
+
+/* Give desktop more usable width */
+@media (min-width: 900px) {
+  #root {
+    display: flex;
+    justify-content: center;
+  }
+
+  #root > div {
+    width: min(1120px, calc(100vw - 48px)) !important;
+    max-width: 1120px !important;
+  }
+}
