@@ -649,3 +649,97 @@ button {
     padding: 11px 4px;
   }
 }
+
+
+/* Ledger v3.7 Savings Push Planner */
+.savings-advice-card {
+  margin: 18px 0;
+  border-color: rgba(255, 208, 90, 0.28);
+  background: linear-gradient(135deg, rgba(255, 208, 90, 0.1), rgba(127, 34, 255, 0.1)), var(--panel);
+}
+
+.savings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.saving-pot-card {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.065);
+  box-shadow: var(--shadow);
+}
+
+.pot-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pot-head h3 {
+  margin: 8px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.pot-head strong {
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(76, 240, 166, 0.12);
+  border: 1px solid rgba(76, 240, 166, 0.25);
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.pot-rank {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(127, 34, 255, 0.18);
+  color: #efe2ff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pot-meta {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pot-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  outline: none;
+  border-radius: 17px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.26);
+  color: white;
+}
+
+.field select:focus {
+  border-color: rgba(168, 85, 255, 0.75);
+  box-shadow: 0 0 0 4px rgba(168, 85, 255, 0.13);
+}
+
+@media (max-width: 900px) {
+  .savings-grid,
+  .pot-edit-grid {
+    grid-template-columns: 1fr;
+  }
+}
