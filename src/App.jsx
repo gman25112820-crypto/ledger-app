@@ -3,6 +3,24 @@ import "./App.css";
 
 const STORAGE_KEY = "ledger_v2_state";
 
+const defaultSubscriptions = [
+  { id: "streaming", name: "Streaming service", cost: 12.99, renewalDate: "2026-05-15", cancelByDate: "2026-05-12", status: "Review", category: "Entertainment" },
+  { id: "music", name: "Music subscription", cost: 10.99, renewalDate: "2026-05-20", cancelByDate: "2026-05-17", status: "Keep", category: "Entertainment" },
+  { id: "phone", name: "Phone contract / app bundle", cost: 28, renewalDate: "2026-06-01", cancelByDate: "2026-05-25", status: "Review", category: "Household" },
+  { id: "kids-club", name: "Kids club / activity", cost: 25, renewalDate: "2026-05-28", cancelByDate: "2026-05-21", status: "Keep", category: "Family" },
+  { id: "insurance-renewal", name: "Insurance renewal check", cost: 0, renewalDate: "2026-07-01", cancelByDate: "2026-06-15", status: "Renegotiate", category: "Protection" },
+];
+
+const defaultSecurityLog = [
+  {
+    id: "welcome-security",
+    type: "Info",
+    title: "Security Team online",
+    message: "Local Demo Mode is active. Ledger is watching renewals, missing local data and planning gaps.",
+    createdAt: new Date().toISOString(),
+  },
+];
+
 const defaultShoppingItems = [
   { id: "milk-bread", name: "Milk, bread and basics", estimatedCost: 12, category: "Food", priority: "Essential", bought: false },
   { id: "packed-lunch", name: "Packed lunch bits", estimatedCost: 18, category: "School", priority: "Essential", bought: false },
@@ -56,6 +74,8 @@ const defaultState = {
 savingsPots: defaultSavingsPots,
   protectedItems: defaultProtectedItems,
   shoppingItems: defaultShoppingItems,
+  subscriptions: defaultSubscriptions,
+  securityLog: defaultSecurityLog,
 };
 
 function currency(value) {
@@ -142,7 +162,7 @@ export default function App() {
     setActiveTab("Home");
   };
 
-  const tabs = ["Home", "Budget", "Shopping", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
+  const tabs = ["Home", "Budget", "Shopping", "Watchtower", "Protected", "Goals", "Savings", "Penny", "Family", "Plan"];
 
   return (
     <div className="ledger-shell">
@@ -218,7 +238,10 @@ export default function App() {
             <GoalsPanel state={state} update={update} figures={figures} />
           )}
 
-          {activeTab === "Shopping" && (
+          {activeTab === "Watchtower" && (
+          <WatchtowerPanel state={state} update={update} figures={figures} />
+        )}
+        {activeTab === "Shopping" && (
           <ShoppingGuardPanel state={state} update={update} figures={figures} />
         )}
         {activeTab === "Protected" && (
@@ -374,6 +397,361 @@ function GoalsPanel({ state, update, figures }) {
       </div>
     </section>
   );
+}
+
+function WatchtowerPanel({ state, update, figures }) {
+  const subscriptions = getSubscriptions(state);
+  const securityLog = getSecurityLog(state);
+  const health = runLedgerSecurityCheck(state, figures, subscriptions);
+
+  const totalMonthlyDrain = subscriptions.reduce((sum, item) => sum + Number(item.cost || 0), 0);
+  const renewingSoon = subscriptions.filter((item) => daysUntil(item.renewalDate) <= 14);
+  const reviewItems = subscriptions.filter((item) => item.status === "Review" || item.status === "Renegotiate");
+  const safeAfterSubscriptions = Number(figures.safe || 0) - totalMonthlyDrain;
+
+  const updateSubscription = (id, key, value) => {
+    const next = subscriptions.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            [key]: key === "cost" ? Number(value) : value,
+          }
+        : item
+    );
+
+    update("subscriptions", next);
+  };
+
+  const addSecurityLog = (type, title, message) => {
+    const nextLog = [
+      {
+        id: `log-${Date.now()}`,
+        type,
+        title,
+        message,
+        createdAt: new Date().toISOString(),
+      },
+      ...getSecurityLog(state),
+    ].slice(0, 12);
+
+    update("securityLog", nextLog);
+  };
+
+  const runSelfRepair = () => {
+    if (!Array.isArray(state.subscriptions) || state.subscriptions.length === 0) {
+      update("subscriptions", defaultSubscriptions);
+    }
+
+    if (!Array.isArray(state.securityLog) || state.securityLog.length === 0) {
+      update("securityLog", defaultSecurityLog);
+    }
+
+    if (typeof defaultSavingsPots !== "undefined" && (!Array.isArray(state.savingsPots) || state.savingsPots.length === 0)) {
+      update("savingsPots", defaultSavingsPots);
+    }
+
+    if (typeof defaultProtectedItems !== "undefined" && (!Array.isArray(state.protectedItems) || state.protectedItems.length === 0)) {
+      update("protectedItems", defaultProtectedItems);
+    }
+
+    if (typeof defaultShoppingItems !== "undefined" && (!Array.isArray(state.shoppingItems) || state.shoppingItems.length === 0)) {
+      update("shoppingItems", defaultShoppingItems);
+    }
+
+    addSecurityLog(
+      "Repair",
+      "Self-repair check completed",
+      "Ledger checked local demo data and restored missing default structures where needed."
+    );
+  };
+
+  const logManualCheck = () => {
+    addSecurityLog(
+      health.level === "green" ? "Check" : "Warning",
+      "Manual security scan",
+      health.message
+    );
+  };
+
+  return (
+    <>
+      <div className="section-title">
+        <div>
+          <span className="kicker">SUBSCRIPTION WATCHTOWER + SECURITY TEAM</span>
+          <h2>Keep an eye on money before it disappears</h2>
+          <p>
+            What is happening: Ledger is watching renewals, local data health and planning gaps.
+            What it means: subscriptions and broken local data are flagged before they cause problems.
+            What to do next: review renewals, cancel waste, then run a security check.
+          </p>
+        </div>
+        <div className={`safe-pill small ${safeAfterSubscriptions < 0 ? "danger" : ""}`}>
+          <span>Safe after subs</span>
+          <strong>{currency(safeAfterSubscriptions)}</strong>
+        </div>
+      </div>
+
+      <div className="watchtower-hero">
+        <div>
+          <span className="kicker">LEDGE SECURITY TEAM</span>
+          <h3>{health.title}</h3>
+          <p>{health.message}</p>
+        </div>
+        <div className={`watchtower-orb ${health.level}`}>
+          {health.label}
+        </div>
+      </div>
+
+      <div className="metric-grid compact">
+        <Metric title="Monthly sub drain" value={currency(totalMonthlyDrain)} />
+        <Metric title="Renewing soon" value={renewingSoon.length} />
+        <Metric title="Needs review" value={reviewItems.length} />
+        <Metric title="Security issues" value={health.issues.length} />
+      </div>
+
+      <div className="watchtower-actions">
+        <button className="primary-action" onClick={runSelfRepair}>
+          Run local self-repair
+        </button>
+        <button className="ghost-action" onClick={logManualCheck}>
+          Log security check
+        </button>
+      </div>
+
+      <div className="panel watchtower-advice">
+        <span className="kicker">PENNY WATCHTOWER ADVICE ✨</span>
+        <p>{getWatchtowerAdvice(safeAfterSubscriptions, renewingSoon, reviewItems, health)}</p>
+      </div>
+
+      {health.issues.length > 0 && (
+        <div className="security-issues">
+          {health.issues.map((issue) => (
+            <div className="security-issue-card" key={issue}>
+              <strong>{issue}</strong>
+              <span>Recommended action: review or run local self-repair.</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="watchtower-grid">
+        <div className="watchtower-column">
+          <div className="column-head">
+            <span className="kicker">SUBSCRIPTIONS</span>
+            <h3>Renewal radar</h3>
+          </div>
+
+          <div className="subscription-list">
+            {subscriptions.map((item) => {
+              const renewalDays = daysUntil(item.renewalDate);
+              const cancelDays = daysUntil(item.cancelByDate);
+              const isSoon = renewalDays <= 14;
+
+              return (
+                <div className={`subscription-card ${isSoon ? "soon" : ""}`} key={item.id}>
+                  <div className="subscription-top">
+                    <div>
+                      <span className="pot-rank">{item.category}</span>
+                      <h3>{item.name}</h3>
+                    </div>
+                    <strong>{currency(item.cost)}/mo</strong>
+                  </div>
+
+                  <div className="subscription-meta">
+                    <span>Renews in {renewalDays} days</span>
+                    <span>Cancel by {item.cancelByDate || "not set"}</span>
+                    <span>{cancelDays <= 7 ? "Cancel window close" : "Cancel window open"}</span>
+                  </div>
+
+                  <div className="subscription-edit-grid">
+                    <NumberInput
+                      label="Monthly cost"
+                      value={item.cost}
+                      onChange={(v) => updateSubscription(item.id, "cost", v)}
+                    />
+
+                    <label className="field">
+                      <span>Renewal date</span>
+                      <input
+                        type="date"
+                        value={item.renewalDate || ""}
+                        onChange={(e) => updateSubscription(item.id, "renewalDate", e.target.value)}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Cancel by</span>
+                      <input
+                        type="date"
+                        value={item.cancelByDate || ""}
+                        onChange={(e) => updateSubscription(item.id, "cancelByDate", e.target.value)}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Status</span>
+                      <select
+                        value={item.status || "Review"}
+                        onChange={(e) => updateSubscription(item.id, "status", e.target.value)}
+                      >
+                        <option value="Keep">Keep</option>
+                        <option value="Review">Review</option>
+                        <option value="Cancel">Cancel</option>
+                        <option value="Renegotiate">Renegotiate</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="watchtower-column">
+          <div className="column-head">
+            <span className="kicker">SECURITY LOG</span>
+            <h3>What Ledger is watching</h3>
+          </div>
+
+          <div className="security-log">
+            {securityLog.map((entry) => (
+              <div className="security-log-card" key={entry.id}>
+                <div>
+                  <span className="pot-rank">{entry.type}</span>
+                  <h3>{entry.title}</h3>
+                  <p>{entry.message}</p>
+                </div>
+                <small>{formatShortDate(entry.createdAt)}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function getSubscriptions(state) {
+  return Array.isArray(state.subscriptions) && state.subscriptions.length
+    ? state.subscriptions
+    : defaultSubscriptions;
+}
+
+function getSecurityLog(state) {
+  return Array.isArray(state.securityLog) && state.securityLog.length
+    ? state.securityLog
+    : defaultSecurityLog;
+}
+
+function daysUntil(dateValue) {
+  if (!dateValue) return 999;
+
+  const today = new Date();
+  const target = new Date(dateValue);
+
+  if (Number.isNaN(target.getTime())) return 999;
+
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+
+  return Math.ceil((target - today) / 86400000);
+}
+
+function runLedgerSecurityCheck(state, figures, subscriptions) {
+  const issues = [];
+
+  if (!Array.isArray(state.subscriptions) || state.subscriptions.length === 0) {
+    issues.push("Subscription data missing");
+  }
+
+  if (!Array.isArray(state.securityLog) || state.securityLog.length === 0) {
+    issues.push("Security log missing");
+  }
+
+  if (typeof defaultSavingsPots !== "undefined" && (!Array.isArray(state.savingsPots) || state.savingsPots.length === 0)) {
+    issues.push("Savings pots missing");
+  }
+
+  if (typeof defaultProtectedItems !== "undefined" && (!Array.isArray(state.protectedItems) || state.protectedItems.length === 0)) {
+    issues.push("Protected money data missing");
+  }
+
+  if (typeof defaultShoppingItems !== "undefined" && (!Array.isArray(state.shoppingItems) || state.shoppingItems.length === 0)) {
+    issues.push("Shopping list data missing");
+  }
+
+  const renewingSoon = subscriptions.filter((item) => daysUntil(item.renewalDate) <= 7);
+
+  if (renewingSoon.length > 0) {
+    issues.push(`${renewingSoon.length} subscription renewal window close`);
+  }
+
+  if (Number(figures.safe || 0) < 0) {
+    issues.push("Safe-to-spend is negative");
+  }
+
+  if (issues.length >= 3) {
+    return {
+      level: "red",
+      label: "ALERT",
+      title: "Security Team found urgent issues",
+      message: "Ledger has detected multiple problems that need attention before this month is considered safe.",
+      issues,
+    };
+  }
+
+  if (issues.length > 0) {
+    return {
+      level: "amber",
+      label: "WATCH",
+      title: "Security Team is watching",
+      message: "Ledger found a few things to review. Nothing is connected to banks; this is local demo data only.",
+      issues,
+    };
+  }
+
+  return {
+    level: "green",
+    label: "CLEAR",
+    title: "Security Team clear",
+    message: "Local demo data looks healthy. No urgent renewal or planning warnings are currently showing.",
+    issues,
+  };
+}
+
+function getWatchtowerAdvice(safeAfterSubscriptions, renewingSoon, reviewItems, health) {
+  if (health.level === "red") {
+    return "Fab honesty moment: do the safety check first. Fix missing data, review renewal windows, and avoid treating this month as fully safe yet.";
+  }
+
+  if (renewingSoon.length > 0) {
+    return `Heads up, lovely. ${renewingSoon.length} subscription or renewal is close. Check whether to keep, cancel or renegotiate before it renews.`;
+  }
+
+  if (reviewItems.length > 0) {
+    return `There are ${reviewItems.length} items marked for review. This is where quiet money leaks usually hide.`;
+  }
+
+  if (safeAfterSubscriptions < 0) {
+    return "Subscriptions are pushing the month into danger. Cancel or pause anything that is not essential.";
+  }
+
+  return "Fabulous. Renewals are visible, the Security Team is clear, and subscription spending is included before you decide what is safe.";
+}
+
+function formatShortDate(dateValue) {
+  if (!dateValue) return "Now";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "Now";
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function ShoppingGuardPanel({ state, update, figures }) {
