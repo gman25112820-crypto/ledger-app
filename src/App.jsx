@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 const STORAGE_KEY = "ledger_v2_state";
+const LEDGER_NAV_UNLOCK_STAMP = "nav-unlocked-v4.0.3";
+const LEDGER_BUILD_STAMP = "v4.0.2-runtime-visible-1777654190978";
 
 const defaultSubscriptions = [
   { id: "streaming", name: "Streaming service", cost: 12.99, renewalDate: "2026-05-15", cancelByDate: "2026-05-12", status: "Review", category: "Entertainment" },
@@ -74,7 +76,7 @@ const defaultState = {
 savingsPots: defaultSavingsPots,
   protectedItems: defaultProtectedItems,
   shoppingItems: defaultShoppingItems,
-  subscriptions: defaultSubscriptions,
+  subscriptionItems: defaultSubscriptions,
   securityLog: defaultSecurityLog,
 };
 
@@ -113,7 +115,7 @@ export default function App() {
       state.unpaidBills +
       state.weeklyFood +
       state.fuelTravel +
-      state.subscriptions +
+      state.subscriptionItems +
       state.debtPayment;
 
     const goalProgress = clamp(
@@ -338,7 +340,7 @@ function BudgetPanel({ state, update, figures }) {
           <NumberInput label="Days until payday" value={state.paydayDays} onChange={(v) => update("paydayDays", v)} />
           <NumberInput label="Food / household" value={state.weeklyFood} onChange={(v) => update("weeklyFood", v)} />
           <NumberInput label="Fuel / travel" value={state.fuelTravel} onChange={(v) => update("fuelTravel", v)} />
-          <NumberInput label="Subscriptions" value={state.subscriptions} onChange={(v) => update("subscriptions", v)} />
+          <NumberInput label="Subscriptions" value={state.subscriptionItems} onChange={(v) => update("subscriptionItems", v)} />
           <NumberInput label="Debt payment" value={state.debtPayment} onChange={(v) => update("debtPayment", v)} />
         </div>
       </div>
@@ -349,7 +351,7 @@ function BudgetPanel({ state, update, figures }) {
           <li><span>Unpaid bills</span><strong>{currency(state.unpaidBills)}</strong></li>
           <li><span>Food estimate</span><strong>{currency(state.weeklyFood)}</strong></li>
           <li><span>Fuel / travel</span><strong>{currency(state.fuelTravel)}</strong></li>
-          <li><span>Subscriptions</span><strong>{currency(state.subscriptions)}</strong></li>
+          <li><span>Subscriptions</span><strong>{currency(state.subscriptionItems)}</strong></li>
           <li><span>Debt payment</span><strong>{currency(state.debtPayment)}</strong></li>
         </ul>
       </div>
@@ -419,7 +421,7 @@ function WatchtowerPanel({ state, update, figures }) {
         : item
     );
 
-    update("subscriptions", next);
+    update("subscriptionItems", next);
   };
 
   const addSecurityLog = (type, title, message) => {
@@ -438,8 +440,8 @@ function WatchtowerPanel({ state, update, figures }) {
   };
 
   const runSelfRepair = () => {
-    if (!Array.isArray(state.subscriptions) || state.subscriptions.length === 0) {
-      update("subscriptions", defaultSubscriptions);
+    if (!Array.isArray(state.subscriptionItems) || state.subscriptionItems.length === 0) {
+      update("subscriptionItems", defaultSubscriptions);
     }
 
     if (!Array.isArray(state.securityLog) || state.securityLog.length === 0) {
@@ -632,8 +634,8 @@ function WatchtowerPanel({ state, update, figures }) {
 }
 
 function getSubscriptions(state) {
-  return Array.isArray(state.subscriptions) && state.subscriptions.length
-    ? state.subscriptions
+  return Array.isArray(state.subscriptionItems) && state.subscriptionItems.length
+    ? state.subscriptionItems
     : defaultSubscriptions;
 }
 
@@ -660,7 +662,7 @@ function daysUntil(dateValue) {
 function runLedgerSecurityCheck(state, figures, subscriptions) {
   const issues = [];
 
-  if (!Array.isArray(state.subscriptions) || state.subscriptions.length === 0) {
+  if (!Array.isArray(state.subscriptionItems) || state.subscriptionItems.length === 0) {
     issues.push("Subscription data missing");
   }
 

@@ -1231,3 +1231,56 @@ button {
     align-items: flex-start;
   }
 }
+
+
+/* Ledger runtime visibility repair */
+body {
+  min-height: 100vh;
+  background: #130727;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+
+/* Ledger v4.0.3 Navigation Unlock */
+.bottom-nav,
+.mobile-nav,
+nav.bottom-nav {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-nav::-webkit-scrollbar,
+.mobile-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.bottom-nav::-webkit-scrollbar-thumb,
+.mobile-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.bottom-nav button,
+.mobile-nav button,
+nav.bottom-nav button {
+  min-width: 78px;
+  flex: 0 0 auto;
+}
+
+.tabs,
+.tab-row,
+.nav-tabs {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tabs button,
+.tab-row button,
+.nav-tabs button {
+  white-space: nowrap;
+}
