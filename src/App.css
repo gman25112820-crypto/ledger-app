@@ -366,177 +366,181 @@ textarea:focus {
 }
 
 .muted {
-  color: var(--muted);
-}
+cd "/c/Users/Garet/ledger"
 
-.dangerText {
-  color: var(--warning);
-  font-weight: 800;
-}
+mkdir -p src
 
-.notice {
-  color: var(--good);
-  font-weight: 800;
-  margin-top: 12px;
-}
+cat > src/App.jsx <<'EOF'
+import React, { useMemo, useRef, useState } from "react";
+import "./App.css";
 
-.decisionText {
-  font-size: 18px;
-  color: var(--text);
-}
+const STORAGE_KEY = "ledger_household_v4_trust_build";
 
-.miniList {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 12px;
-}
+const todayIso = () => new Date().toISOString().slice(0, 10);
 
-.miniItem {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-}
+const defaultData = {
+  acceptedSafety: false,
+  household: {
+    name: "Your Household",
+    payday: "2026-05-31",
+    income: 1200,
+    monthlySpending: 350,
+    emergencyTarget: 1000,
+    emergencySaved: 120,
+  },
+  bills: [
+    {
+      id: "bill-rent",
+      name: "Rent / Mortgage",
+      amount: 550,
+      dueDate: "2026-05-28",
+      frequency: "Monthly",
+      category: "Home",
+      paid: false,
+      autoRenew: false,
+      reminderDays: 3,
+      notes: "",
+    },
+    {
+      id: "bill-energy",
+      name: "Energy",
+      amount: 95,
+      dueDate: "2026-05-20",
+      frequency: "Monthly",
+      category: "Utilities",
+      paid: false,
+      autoRenew: true,
+      reminderDays: 5,
+      notes: "Check usage before renewal.",
+    },
+    {
+      id: "bill-streaming",
+      name: "Streaming subscription",
+      amount: 12.99,
+      dueDate: "2026-05-16",
+      frequency: "Monthly",
+      category: "Subscription",
+      paid: false,
+      autoRenew: true,
+      reminderDays: 7,
+      notes: "Cancel if not being used.",
+    },
+  ],
+  goals: [
+    {
+      id: "goal-xmas",
+      name: "Christmas fund",
+      target: 500,
+      saved: 80,
+      category: "Family",
+      notes: "Keep pressure off December.",
+    },
+    {
+      id: "goal-school",
+      name: "School clubs",
+      target: 180,
+      saved: 35,
+      category: "Kids",
+      notes: "",
+    },
+    {
+      id: "goal-birthday",
+      name: "Birthdays",
+      target: 300,
+      saved: 60,
+      category: "Family",
+      notes: "",
+    },
+  ],
+};
 
-.miniItem span {
-  display: block;
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.progressTrack {
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.progressFill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-}
-
-.safetyCard h3 {
-  margin-top: 18px;
-}
-
-.safetyCard h3:first-child {
-  margin-top: 0;
-}
-
-.onboardingOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(2, 6, 23, 0.84);
-  backdrop-filter: blur(18px);
-  display: grid;
-  place-items: center;
-  padding: 18px;
-}
-
-.onboardingCard {
-  width: min(720px, 100%);
-  border: 1px solid rgba(125, 211, 252, 0.24);
-  background:
-    radial-gradient(circle at top left, rgba(125, 211, 252, 0.14), transparent 36%),
-    #101523;
-  border-radius: 28px;
-  padding: 26px;
-  box-shadow: var(--shadow);
-}
-
-.warningBox {
-  border: 1px solid rgba(251, 191, 36, 0.34);
-  background: rgba(251, 191, 36, 0.08);
-  border-radius: 20px;
-  padding: 16px;
-  margin: 18px 0;
-}
-
-.warningBox strong {
-  display: block;
-  margin-bottom: 8px;
-  color: #fde68a;
-}
-
-.warningBox ul {
-  margin-bottom: 0;
-}
-
-@media (max-width: 980px) {
-  .appShell {
-    padding: 14px;
-  }
-
-  .topBar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .sidePanel {
-    position: static;
-  }
-
-  .navStack {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .metricGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .twoColumn,
-  .goalGrid {
-    grid-template-columns: 1fr;
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return defaultData;
+    return { ...defaultData, ...JSON.parse(saved) };
+  } catch {
+    return defaultData;
   }
 }
 
-@media (max-width: 620px) {
-  .contentPanel {
-    padding: 14px;
-    border-radius: 20px;
-  }
-
-  .sectionHeader {
-    flex-direction: column;
-  }
-
-  .metricGrid,
-  .formGrid,
-  .navStack {
-    grid-template-columns: 1fr;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  h2 {
-    font-size: 25px;
-  }
-
-  .metricCard strong {
-    font-size: 23px;
-  }
-
-  .editCardHeader {
-    flex-direction: column;
-  }
-
-  .dangerBtn,
-  .primaryBtn,
-  .secondaryBtn {
-    width: 100%;
-  }
+function money(value) {
+  const number = Number(value || 0);
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+  }).format(number);
 }
+
+function daysUntil(dateString) {
+  const today = new Date(todayIso());
+  const due = new Date(dateString);
+  return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+}
+
+function uid(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+export default function App() {
+  const [data, setData] = useState(loadData);
+  const [tab, setTab] = useState("dashboard");
+  const [importWarning, setImportWarning] = useState("");
+  const fileRef = useRef(null);
+
+  function save(next) {
+    setData(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
+  function patchHousehold(field, value) {
+    save({
+      ...data,
+      household: {
+        ...data.household,
+        [field]: value,
+      },
+    });
+  }
+
+  function patchBill(id, field, value) {
+    save({
+      ...data,
+      bills: data.bills.map((bill) =>
+        bill.id === id ? { ...bill, [field]: value } : bill
+      ),
+    });
+  }
+
+  function patchGoal(id, field, value) {
+    save({
+      ...data,
+      goals: data.goals.map((goal) =>
+        goal.id === id ? { ...goal, [field]: value } : goal
+      ),
+    });
+  }
+
+  function addBill() {
+    save({
+      ...data,
+      bills: [
+        ...data.bills,
+        {
+          id: uid("bill"),
+          name: "New bill",
+          amount: 0,
+          dueDate: todayIso(),
+          frequency: "Monthly",
+          category: "General",
+          paid: false,
+          autoRenew: false,
+          reminderDays: 3,
+          notes: "",
+        },
+      ],
+    });
+    setTab("bills");
+  }
+
+
