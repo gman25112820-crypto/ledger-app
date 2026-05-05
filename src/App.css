@@ -935,3 +935,144 @@ textarea:hover {
 .progressBar span {
   background: linear-gradient(90deg, #22c55e, #38bdf8, #8b5cf6) !important;
 }
+
+/* Ledger premium UI polish pass - safe version */
+body {
+  background:
+    radial-gradient(circle at 12% -10%, rgba(56, 189, 248, 0.24), transparent 34%),
+    radial-gradient(circle at 90% 0%, rgba(139, 92, 246, 0.2), transparent 32%),
+    linear-gradient(180deg, #07101f 0%, #030712 100%);
+}
+
+.ledgerApp::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+.card,
+.metricCard,
+.safetyCard,
+.goalCard {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background:
+    linear-gradient(180deg, rgba(18, 27, 47, 0.94), rgba(9, 16, 31, 0.88)) !important;
+  box-shadow:
+    0 20px 65px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+
+.heroHeader,
+.topHeader,
+.topHero {
+  border-color: rgba(125, 211, 252, 0.18) !important;
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.navTabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: 0.9rem 0 1rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  background: rgba(4, 10, 22, 0.76);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+}
+
+.navTabs button {
+  border-radius: 18px;
+  background: transparent;
+  border-color: transparent;
+  color: #aebbd0;
+}
+
+.navTabs button:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.navTabs .active,
+.primaryButton {
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6) !important;
+  color: #06111f !important;
+  border-color: transparent !important;
+  font-weight: 900;
+  box-shadow:
+    0 14px 34px rgba(56, 189, 248, 0.16),
+    0 10px 28px rgba(139, 92, 246, 0.14);
+}
+
+.metricCard {
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(125, 211, 252, 0.24) !important;
+  box-shadow:
+    0 26px 76px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(125, 211, 252, 0.06) !important;
+}
+
+input,
+select,
+textarea {
+  background: rgba(3, 9, 20, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.13) !important;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(125, 211, 252, 0.28) !important;
+}
+
+.billRow,
+.shoppingRow,
+.breakdownItem,
+.actionItem,
+.guidanceItem {
+  background:
+    linear-gradient(180deg, rgba(8, 17, 34, 0.84), rgba(4, 11, 23, 0.74)) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.billRow,
+.shoppingRow,
+.metricCard {
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.billRow:hover,
+.shoppingRow:hover {
+  transform: translateY(-1px);
+  border-color: rgba(125, 211, 252, 0.2) !important;
+}
+
+.badge,
+.healthPill {
+  box-shadow:
+    0 0 0 1px rgba(125, 211, 252, 0.08),
+    0 12px 28px rgba(14, 165, 233, 0.08);
+}
+
+.progressBar {
+  height: 15px !important;
+  background: rgba(255, 255, 255, 0.11) !important;
+}
+
+.progressBar span {
+  background: linear-gradient(90deg, #22c55e, #38bdf8, #8b5cf6) !important;
+}
