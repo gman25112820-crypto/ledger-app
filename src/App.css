@@ -1,30 +1,21 @@
-:root {
-  --bg: #090b12;
-  --panel: rgba(255, 255, 255, 0.06);
-  --panel2: rgba(255, 255, 255, 0.09);
-  --border: rgba(255, 255, 255, 0.12);
-  --text: #f4f7fb;
-  --muted: #a7b0c0;
-  --accent: #7dd3fc;
-  --accent2: #c084fc;
-  --danger: #fb7185;
-  --good: #86efac;
-  --warning: #fbbf24;
-  --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-}
-
 * {
   box-sizing: border-box;
 }
 
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #eef5ff;
+  background: #07111f;
+}
+
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(125, 211, 252, 0.17), transparent 34%),
-    radial-gradient(circle at top right, rgba(192, 132, 252, 0.16), transparent 30%),
-    var(--bg);
-  color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.16), transparent 32%),
+    #07111f;
 }
 
 button,
@@ -35,40 +26,33 @@ textarea {
 }
 
 button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef5ff;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
   cursor: pointer;
 }
 
-.appShell {
-  min-height: 100vh;
-  padding: 22px;
+button:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
-.topBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  max-width: 1280px;
-  margin: 0 auto 18px;
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 8, 23, 0.75);
+  color: #eef5ff;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  outline: none;
 }
 
-.brandRow {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.logoMark {
-  width: 48px;
-  height: 48px;
-  border-radius: 18px;
-  display: grid;
-  place-items: center;
-  color: #07111d;
-  font-weight: 900;
-  font-size: 24px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  box-shadow: 0 14px 40px rgba(125, 211, 252, 0.25);
+textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
 h1,
@@ -79,468 +63,368 @@ p {
 }
 
 h1 {
-  margin-bottom: 3px;
-  font-size: 28px;
+  font-size: clamp(2rem, 6vw, 4rem);
+  letter-spacing: -0.06em;
+  margin-bottom: 0.4rem;
 }
 
 h2 {
-  margin-bottom: 6px;
-  font-size: 30px;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
 }
 
-h3 {
-  margin-bottom: 12px;
+ul {
+  margin-bottom: 0;
 }
 
-p,
-li {
-  color: var(--muted);
-  line-height: 1.55;
+.app,
+.appShell,
+.ledgerApp {
+  width: min(1180px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 22px 0 42px;
 }
 
-.topBar p {
-  margin: 0;
-}
-
-.statusPill,
-.eyebrow {
-  color: var(--accent);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.11em;
-  font-weight: 800;
-}
-
-.statusPill {
+.topbar,
+.topHeader,
+.header,
+.appHeader {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.82);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.headerActions,
+.actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.badge,
+.modeBadge,
+.demoBadge {
+  display: inline-flex;
+  width: fit-content;
   align-items: center;
-  gap: 8px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  padding: 10px 14px;
+  margin-bottom: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(125, 211, 252, 0.25);
   border-radius: 999px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #aee8ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tabs,
+.nav,
+.navTabs {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.tabs button,
+.nav button,
+.navTabs button {
   white-space: nowrap;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  background: var(--good);
-  border-radius: 999px;
-  box-shadow: 0 0 20px var(--good);
-}
-
-.layout {
-  max-width: 1280px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 310px 1fr;
-  gap: 18px;
-}
-
-.sidePanel,
-.contentPanel,
-.card,
-.metricCard,
-.editCard,
-.householdCard,
-.pennyCard {
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, var(--panel2), var(--panel));
-  box-shadow: var(--shadow);
-  border-radius: 24px;
-}
-
-.sidePanel {
-  padding: 16px;
-  position: sticky;
-  top: 18px;
-  height: fit-content;
-}
-
-.contentPanel {
-  padding: 20px;
-  min-height: 720px;
-}
-
-.householdCard,
-.pennyCard {
-  padding: 16px;
-  box-shadow: none;
-}
-
-.pennyCard {
-  margin-top: 14px;
-}
-
-.navStack {
-  display: grid;
-  gap: 9px;
-  margin: 14px 0;
-}
-
-.navBtn {
-  width: 100%;
-  text-align: left;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  padding: 13px 14px;
-  border-radius: 16px;
-}
-
-.navBtn.active,
-.navBtn:hover {
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.2), rgba(192, 132, 252, 0.16));
-  border-color: rgba(125, 211, 252, 0.42);
-}
-
-.sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-.buttonRow {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.primaryBtn,
-.secondaryBtn,
-.dangerBtn {
-  border: 0;
-  border-radius: 16px;
-  padding: 12px 15px;
-  color: var(--text);
-  font-weight: 800;
-}
-
-.primaryBtn {
-  background: linear-gradient(135deg, #0284c7, #9333ea);
-}
-
-.secondaryBtn {
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid var(--border);
-}
-
-.dangerBtn {
-  background: rgba(251, 113, 133, 0.16);
-  border: 1px solid rgba(251, 113, 133, 0.35);
-  color: #fecdd3;
-}
-
-.full {
-  width: 100%;
-}
-
-.metricGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.metricCard {
-  padding: 18px;
-}
-
-.metricCard span {
-  display: block;
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 8px;
-}
-
-.metricCard strong {
-  display: block;
-  font-size: 26px;
-  margin-bottom: 6px;
-}
-
-.metricCard p {
-  margin: 0;
-  font-size: 13px;
-}
-
-.metricCard.urgent {
-  border-color: rgba(251, 191, 36, 0.45);
-  background: linear-gradient(180deg, rgba(251, 191, 36, 0.14), rgba(255, 255, 255, 0.05));
-}
-
-.twoColumn {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.card,
-.editCard {
-  padding: 18px;
-}
-
-.formGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-label {
-  display: grid;
-  gap: 7px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  border: 1px solid var(--border);
-  background: rgba(2, 6, 23, 0.7);
-  color: var(--text);
-  border-radius: 14px;
-  padding: 11px 12px;
-  outline: none;
-}
-
-textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: rgba(125, 211, 252, 0.62);
-  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.1);
-}
-
-.titleInput {
-  border: 0;
-  background: transparent;
-  padding-left: 0;
-  font-size: 20px;
+.tabs button.active,
+.nav button.active,
+.navTabs button.active,
+.active {
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+  color: #07111f;
+  border-color: transparent;
   font-weight: 900;
 }
 
-.listStack,
-.goalGrid {
+.grid,
+.dashboardGrid,
+.cardGrid {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.goalGrid {
+.card,
+.panel,
+.metric,
+.metricCard,
+.heroCard,
+.wideCard,
+.statCard,
+.goalCard,
+.billCard,
+.safetyCard {
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.18);
+  padding: 1rem;
+  backdrop-filter: blur(18px);
+}
+
+.heroCard,
+.wideCard,
+.fullWidth {
+  grid-column: span 4;
+}
+
+.metricCard,
+.metric,
+.statCard {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.metricCard span,
+.metric span,
+.statCard span,
+.muted,
+.helper,
+.smallText {
+  color: #a9bbd3;
+}
+
+.metricCard strong,
+.metric strong,
+.statCard strong {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  letter-spacing: -0.05em;
+}
+
+.primaryButton,
+.primary,
+.cta {
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+  color: #07111f;
+  border-color: transparent;
+  font-weight: 900;
+}
+
+.dangerButton,
+.danger {
+  background: rgba(244, 63, 94, 0.14);
+  border-color: rgba(244, 63, 94, 0.28);
+  color: #fecdd3;
+}
+
+.warningBox,
+.warning,
+.notice,
+.alert,
+.renewBox {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 20px;
+}
+
+.warningBox,
+.warning,
+.alert {
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  background: rgba(244, 63, 94, 0.09);
+  color: #ffe5e9;
+}
+
+.notice,
+.renewBox {
+  border: 1px solid rgba(251, 191, 36, 0.24);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.formGrid,
+.safetyGrid,
+.goalGrid,
+.actionGrid,
+.miniForm {
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
 }
 
-.editCardHeader {
+.sectionHeader,
+.rowHeader {
   display: flex;
   justify-content: space-between;
-  gap: 14px;
   align-items: flex-start;
-  margin-bottom: 14px;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.checkRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin: 14px 0;
+.tableList,
+.list,
+.guidanceList {
+  display: grid;
+  gap: 0.75rem;
 }
 
-.checkRow label {
+.billRow,
+.listRow,
+.itemRow {
+  display: grid;
+  grid-template-columns: 1.4fr 0.7fr 0.55fr 0.85fr 0.8fr 0.55fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  background: rgba(2, 8, 23, 0.36);
+}
+
+.checkLabel {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.45rem;
 }
 
-.checkRow input {
+.checkLabel input {
   width: auto;
 }
 
-.muted {
-cd "/c/Users/Garet/ledger"
+.progressBar {
+  height: 13px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
 
-mkdir -p src
+.progressBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8, #8b5cf6);
+}
 
-cat > src/App.jsx <<'EOF'
-import React, { useMemo, useRef, useState } from "react";
-import "./App.css";
+.onboardingOverlay,
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 8, 23, 0.84);
+  backdrop-filter: blur(16px);
+}
 
-const STORAGE_KEY = "ledger_household_v4_trust_build";
+.onboardingCard,
+.modalCard {
+  width: min(650px, 100%);
+  padding: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  background: #0f172a;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
+}
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
+.dangerText,
+.negative {
+  color: #fb7185;
+}
 
-const defaultData = {
-  acceptedSafety: false,
-  household: {
-    name: "Your Household",
-    payday: "2026-05-31",
-    income: 1200,
-    monthlySpending: 350,
-    emergencyTarget: 1000,
-    emergencySaved: 120,
-  },
-  bills: [
-    {
-      id: "bill-rent",
-      name: "Rent / Mortgage",
-      amount: 550,
-      dueDate: "2026-05-28",
-      frequency: "Monthly",
-      category: "Home",
-      paid: false,
-      autoRenew: false,
-      reminderDays: 3,
-      notes: "",
-    },
-    {
-      id: "bill-energy",
-      name: "Energy",
-      amount: 95,
-      dueDate: "2026-05-20",
-      frequency: "Monthly",
-      category: "Utilities",
-      paid: false,
-      autoRenew: true,
-      reminderDays: 5,
-      notes: "Check usage before renewal.",
-    },
-    {
-      id: "bill-streaming",
-      name: "Streaming subscription",
-      amount: 12.99,
-      dueDate: "2026-05-16",
-      frequency: "Monthly",
-      category: "Subscription",
-      paid: false,
-      autoRenew: true,
-      reminderDays: 7,
-      notes: "Cancel if not being used.",
-    },
-  ],
-  goals: [
-    {
-      id: "goal-xmas",
-      name: "Christmas fund",
-      target: 500,
-      saved: 80,
-      category: "Family",
-      notes: "Keep pressure off December.",
-    },
-    {
-      id: "goal-school",
-      name: "School clubs",
-      target: 180,
-      saved: 35,
-      category: "Kids",
-      notes: "",
-    },
-    {
-      id: "goal-birthday",
-      name: "Birthdays",
-      target: 300,
-      saved: 60,
-      category: "Family",
-      notes: "",
-    },
-  ],
-};
+.positive {
+  color: #86efac;
+}
 
-function loadData() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return defaultData;
-    return { ...defaultData, ...JSON.parse(saved) };
-  } catch {
-    return defaultData;
+@media (max-width: 980px) {
+  .topbar,
+  .topHeader,
+  .header,
+  .appHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid,
+  .dashboardGrid,
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroCard,
+  .wideCard,
+  .fullWidth {
+    grid-column: span 2;
+  }
+
+  .billRow,
+  .listRow,
+  .itemRow {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-function money(value) {
-  const number = Number(value || 0);
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(number);
+@media (max-width: 640px) {
+  .app,
+  .appShell,
+  .ledgerApp {
+    width: min(100% - 18px, 1180px);
+    padding-top: 10px;
+  }
+
+  .topbar,
+  .topHeader,
+  .header,
+  .appHeader,
+  .card,
+  .panel,
+  .metric,
+  .metricCard,
+  .heroCard,
+  .wideCard,
+  .statCard {
+    border-radius: 22px;
+  }
+
+  .grid,
+  .dashboardGrid,
+  .cardGrid,
+  .formGrid,
+  .safetyGrid,
+  .goalGrid,
+  .actionGrid,
+  .miniForm {
+    grid-template-columns: 1fr;
+  }
+
+  .heroCard,
+  .wideCard,
+  .fullWidth {
+    grid-column: span 1;
+  }
+
+  .sectionHeader,
+  .rowHeader {
+    flex-direction: column;
+  }
+
+  .billRow,
+  .listRow,
+  .itemRow {
+    grid-template-columns: 1fr;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .tabs button,
+  .nav button,
+  .navTabs button {
+    width: auto;
+  }
 }
-
-function daysUntil(dateString) {
-  const today = new Date(todayIso());
-  const due = new Date(dateString);
-  return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-}
-
-function uid(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-export default function App() {
-  const [data, setData] = useState(loadData);
-  const [tab, setTab] = useState("dashboard");
-  const [importWarning, setImportWarning] = useState("");
-  const fileRef = useRef(null);
-
-  function save(next) {
-    setData(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  }
-
-  function patchHousehold(field, value) {
-    save({
-      ...data,
-      household: {
-        ...data.household,
-        [field]: value,
-      },
-    });
-  }
-
-  function patchBill(id, field, value) {
-    save({
-      ...data,
-      bills: data.bills.map((bill) =>
-        bill.id === id ? { ...bill, [field]: value } : bill
-      ),
-    });
-  }
-
-  function patchGoal(id, field, value) {
-    save({
-      ...data,
-      goals: data.goals.map((goal) =>
-        goal.id === id ? { ...goal, [field]: value } : goal
-      ),
-    });
-  }
-
-  function addBill() {
-    save({
-      ...data,
-      bills: [
-        ...data.bills,
-        {
-          id: uid("bill"),
-          name: "New bill",
-          amount: 0,
-          dueDate: todayIso(),
-          frequency: "Monthly",
-          category: "General",
-          paid: false,
-          autoRenew: false,
-          reminderDays: 3,
-          notes: "",
-        },
-      ],
-    });
-    setTab("bills");
-  }
-
-
