@@ -1076,3 +1076,775 @@ textarea:hover {
 .progressBar span {
   background: linear-gradient(90deg, #22c55e, #38bdf8, #8b5cf6) !important;
 }
+
+/* Ledger command-centre product layer */
+.premiumCommandStrip {
+  display: grid;
+  grid-template-columns: 1.45fr repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.commandMainCard,
+.commandTile {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(18, 28, 50, 0.96), rgba(8, 15, 29, 0.9));
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.commandMainCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+}
+
+.commandMainCard::after,
+.commandTile::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  width: 190px;
+  height: 190px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+.commandOrb {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, #38bdf8, #8b5cf6);
+  color: #06111f;
+  font-size: 2rem;
+  font-weight: 950;
+  box-shadow:
+    0 18px 44px rgba(56, 189, 248, 0.2),
+    0 12px 38px rgba(139, 92, 246, 0.16);
+}
+
+.commandMainCard h2 {
+  margin-bottom: 0.45rem;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.commandMainCard p,
+.commandTile p {
+  margin-bottom: 0;
+  color: #b8c8de;
+  line-height: 1.55;
+}
+
+.commandTile {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 1rem;
+}
+
+.tileIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.13);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  color: #aee8ff;
+  font-weight: 950;
+}
+
+.commandTile h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.commandTile:hover,
+.commandMainCard:hover {
+  border-color: rgba(125, 211, 252, 0.28);
+  transform: translateY(-1px);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+@media (max-width: 1080px) {
+  .premiumCommandStrip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .commandMainCard {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .premiumCommandStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .commandMainCard {
+    grid-column: span 1;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .commandOrb {
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    font-size: 1.55rem;
+  }
+}
+
+/* Ledger parent-focused dashboard rebuild */
+.parentHomeDashboard {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.parentHeroCard,
+.todayActionPanel,
+.familyPriorityCard,
+.plainFamilyExplanation {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(19, 31, 55, 0.96), rgba(8, 15, 29, 0.92));
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.parentHeroCard {
+  grid-row: span 2;
+  padding: 1.25rem;
+  border-radius: 30px;
+}
+
+.parentHeroTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.parentHeroCard h2 {
+  max-width: 780px;
+  margin-bottom: 0.65rem;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  background: linear-gradient(135deg, #ffffff 0%, #c7e7ff 45%, #bca7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.parentHeroCard p {
+  max-width: 760px;
+  color: #bed0e8;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.parentStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 126px;
+  padding: 0.48rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.parentStatus.good {
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  background: rgba(34, 197, 94, 0.12);
+  color: #bbf7d0;
+}
+
+.parentStatus.danger {
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  background: rgba(244, 63, 94, 0.12);
+  color: #fecdd3;
+}
+
+.parentMoneyLine {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.parentMoneyLine div {
+  padding: 0.95rem;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  background: rgba(3, 10, 22, 0.62);
+}
+
+.parentMoneyLine span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #9fb4d0;
+  font-size: 0.86rem;
+}
+
+.parentMoneyLine strong {
+  display: block;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.06em;
+}
+
+.todayActionPanel {
+  padding: 1rem;
+  border-radius: 28px;
+}
+
+.todayActionPanel h3 {
+  margin-bottom: 0.85rem;
+  font-size: 1.35rem;
+}
+
+.todayActionList {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.todayActionItem {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 0.7rem;
+  align-items: start;
+  padding: 0.85rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(3, 10, 22, 0.58);
+}
+
+.todayActionItem span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+  color: #06111f;
+  font-weight: 950;
+}
+
+.todayActionItem p {
+  margin: 0;
+  color: #d8e6f7;
+  line-height: 1.45;
+}
+
+.familyPriorityGrid {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.familyPriorityCard {
+  min-height: 145px;
+  padding: 1rem;
+  border-radius: 26px;
+}
+
+.priorityIcon {
+  display: inline-flex;
+  margin-bottom: 0.65rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  color: #aee8ff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.familyPriorityCard h3 {
+  margin-bottom: 0.3rem;
+  font-size: 2rem;
+  letter-spacing: -0.06em;
+}
+
+.familyPriorityCard p {
+  margin: 0;
+  color: #aebfd6;
+}
+
+.plainFamilyExplanation {
+  grid-column: span 2;
+  padding: 1rem;
+  border-radius: 24px;
+  color: #dcecff;
+  line-height: 1.6;
+}
+
+@media (max-width: 1050px) {
+  .parentHomeDashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .parentHeroCard,
+  .todayActionPanel,
+  .familyPriorityGrid,
+  .plainFamilyExplanation {
+    grid-column: span 1;
+  }
+
+  .familyPriorityGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .parentHeroCard h2 {
+    font-size: 2.35rem;
+  }
+
+  .parentHeroTop {
+    flex-direction: column;
+  }
+
+  .parentMoneyLine,
+  .familyPriorityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .todayActionItem {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ledger header fit and layout repair */
+.heroHeader,
+.topHeader,
+.topHero {
+  width: 100%;
+  max-width: 100%;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px) auto !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: clamp(1rem, 2.2vw, 1.5rem) !important;
+}
+
+.heroText,
+.topHeroMain,
+.heroHeader > div:first-child,
+.topHeader > div:first-child {
+  min-width: 0;
+  overflow: visible;
+}
+
+.heroHeader h1,
+.topHeader h1,
+.topHero h1,
+.heroText h1,
+.topHeroMain h1 {
+  max-width: 100%;
+  margin: 0 0 0.5rem 0 !important;
+  font-size: clamp(3rem, 7vw, 5rem) !important;
+  line-height: 0.9 !important;
+  letter-spacing: -0.075em !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+.heroHeader p,
+.topHeader p,
+.topHero p,
+.heroText p,
+.topHeroMain p,
+.heroSubtitle {
+  max-width: 100% !important;
+  margin-bottom: 0 !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: unset !important;
+  line-height: 1.45 !important;
+}
+
+.heroPanel,
+.topHeroStatus {
+  width: 100%;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.headerActions,
+.heroActions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 0.7rem !important;
+}
+
+.headerActions button,
+.heroActions button {
+  min-width: 92px;
+}
+
+@media (max-width: 980px) {
+  .heroHeader,
+  .topHeader,
+  .topHero {
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+  }
+
+  .heroPanel,
+  .topHeroStatus {
+    max-width: 100%;
+  }
+
+  .headerActions,
+  .heroActions {
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .heroHeader,
+  .topHeader,
+  .topHero {
+    padding: 1rem !important;
+    border-radius: 24px !important;
+  }
+
+  .heroHeader h1,
+  .topHeader h1,
+  .topHero h1,
+  .heroText h1,
+  .topHeroMain h1 {
+    font-size: clamp(2.7rem, 17vw, 4rem) !important;
+  }
+
+  .badge {
+    margin-bottom: 0.65rem !important;
+  }
+
+  .headerActions,
+  .heroActions {
+    width: 100%;
+  }
+
+  .headerActions button,
+  .heroActions button {
+    flex: 1;
+  }
+}
+
+/* Ledger app-like dashboard direction */
+.heroHeader,
+.topHeader,
+.topHero {
+  min-height: unset !important;
+  padding: 1rem 1.1rem !important;
+  border-radius: 26px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 260px) auto !important;
+}
+
+.heroHeader h1,
+.topHeader h1,
+.topHero h1,
+.heroText h1,
+.topHeroMain h1 {
+  font-size: clamp(2.4rem, 5vw, 3.8rem) !important;
+  line-height: 0.92 !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.heroHeader p,
+.topHeader p,
+.topHero p,
+.heroText p,
+.topHeroMain p,
+.heroSubtitle {
+  font-size: 0.98rem !important;
+  color: #b4c4da !important;
+}
+
+.heroPanel,
+.topHeroStatus {
+  min-width: 190px !important;
+  max-width: 260px !important;
+  padding: 0.85rem !important;
+  border-radius: 20px !important;
+}
+
+.heroPanel strong,
+.topHeroStatus strong {
+  font-size: 1.65rem !important;
+}
+
+.headerActions button,
+.heroActions button {
+  padding: 0.7rem 0.85rem !important;
+  min-width: 82px !important;
+}
+
+/* Make the first working area feel less like admin */
+.dashboardGrid {
+  align-items: start;
+}
+
+.dashboardGrid > .card:first-child {
+  order: 8;
+}
+
+.dashboardGrid > .metricCard,
+.dashboardGrid > .card:not(:first-child) {
+  order: 2;
+}
+
+/* Stronger "useful today" visual hierarchy */
+.metricCard {
+  min-height: 118px !important;
+  border-radius: 24px !important;
+}
+
+.metricCard span {
+  font-size: 0.84rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 850;
+}
+
+.metricCard strong {
+  font-size: clamp(1.65rem, 4vw, 2.25rem) !important;
+}
+
+.card h2 {
+  font-size: 1.35rem !important;
+}
+
+/* The edit form should look secondary */
+.dashboardGrid > .card:first-child {
+  opacity: 0.92;
+  border-style: dashed !important;
+}
+
+.dashboardGrid > .card:first-child h2::after {
+  content: " — edit when something changes";
+  color: #8193ad;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Give guidance more importance */
+.guidanceList,
+.actionList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.guidanceItem,
+.actionItem {
+  border-radius: 20px !important;
+  background:
+    linear-gradient(180deg, rgba(12, 31, 54, 0.9), rgba(8, 17, 34, 0.78)) !important;
+  border-color: rgba(125, 211, 252, 0.15) !important;
+}
+
+/* Tighten spacing */
+.navTabs {
+  margin-bottom: 1rem !important;
+}
+
+@media (max-width: 980px) {
+  .heroHeader,
+  .topHeader,
+  .topHero {
+    grid-template-columns: 1fr !important;
+  }
+
+  .heroPanel,
+  .topHeroStatus {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .heroHeader,
+  .topHeader,
+  .topHero {
+    padding: 0.95rem !important;
+  }
+
+  .heroHeader h1,
+  .topHeader h1,
+  .topHero h1,
+  .heroText h1,
+  .topHeroMain h1 {
+    font-size: 2.7rem !important;
+  }
+}
+
+/* Ledger Today Money Plan */
+.todayMoneyPlan {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(19, 31, 55, 0.96), rgba(8, 15, 29, 0.92));
+  box-shadow:
+    0 24px 76px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.todayPlanHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.todayPlanHero h2 {
+  max-width: 780px;
+  margin-bottom: 0.65rem;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  background: linear-gradient(135deg, #ffffff 0%, #c7e7ff 45%, #bca7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.todayPlanHero p {
+  max-width: 760px;
+  margin-bottom: 0;
+  color: #bed0e8;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.todayPlanStatus {
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(3, 10, 22, 0.62);
+}
+
+.todayPlanStatus span {
+  color: #a9bbd3;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.todayPlanStatus strong {
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.07em;
+}
+
+.todayPlanStatus small {
+  color: #a9bbd3;
+}
+
+.todayPlanStatus.danger strong {
+  color: #ff7f96;
+}
+
+.todayPlanStatus.good strong {
+  color: #86efac;
+}
+
+.todayPlanGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.todayPlanCard {
+  padding: 1rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  background:
+    linear-gradient(180deg, rgba(8, 17, 34, 0.86), rgba(4, 11, 23, 0.76));
+}
+
+.todayPlanCard span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 0.7rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+  color: #06111f;
+  font-weight: 950;
+}
+
+.todayPlanCard h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+}
+
+.todayPlanCard p {
+  margin-bottom: 0;
+  color: #b8c8de;
+  line-height: 1.45;
+}
+
+.todayPlanPlain {
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  background: rgba(14, 165, 233, 0.08);
+  color: #dcecff;
+  line-height: 1.55;
+}
+
+/* Push the edit form down visually */
+.dashboardGrid > .card:first-of-type {
+  border-style: dashed !important;
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .todayPlanHero,
+  .todayPlanGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .todayPlanHero h2 {
+    font-size: 2.5rem;
+  }
+}
