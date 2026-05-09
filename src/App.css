@@ -2515,3 +2515,198 @@ textarea:hover {
     font-size: 2rem !important;
   }
 }
+
+/* Ledger Quick Decision Bar */
+.quickDecisionBar {
+  grid-column: 1 / -1;
+  order: -1000;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 0.8fr));
+  gap: 0.8rem;
+  margin-bottom: 0.15rem;
+}
+
+.quickDecisionMain,
+.quickDecisionCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(18, 29, 51, 0.96), rgba(8, 15, 29, 0.9));
+  box-shadow:
+    0 18px 56px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065);
+}
+
+.quickDecisionMain {
+  padding: 1rem;
+}
+
+.quickDecisionMain.good {
+  border-color: rgba(74, 222, 128, 0.2);
+}
+
+.quickDecisionMain.danger {
+  border-color: rgba(251, 113, 133, 0.24);
+}
+
+.quickLabel {
+  display: inline-flex;
+  margin-bottom: 0.45rem;
+  color: #aee8ff;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.quickDecisionMain h2 {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1.45rem, 3.6vw, 2.35rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.quickDecisionMain p {
+  margin: 0;
+  color: #bed0e8;
+  line-height: 1.45;
+}
+
+.quickDecisionCard {
+  display: grid;
+  align-content: center;
+  gap: 0.28rem;
+  padding: 0.95rem;
+}
+
+.quickDecisionCard span {
+  color: #a9bbd3;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quickDecisionCard strong {
+  font-size: clamp(1.15rem, 2.8vw, 1.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.quickDecisionCard small {
+  color: #9fb4d0;
+}
+
+@media (max-width: 980px) {
+  .quickDecisionBar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .quickDecisionMain {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .quickDecisionBar {
+    grid-template-columns: 1fr;
+  }
+
+  .quickDecisionMain {
+    grid-column: span 1;
+  }
+
+  .quickDecisionMain h2 {
+    font-size: 1.75rem;
+  }
+}
+
+/* Ledger This Week Focus */
+.thisWeekFocusPanel {
+  grid-column: 1 / -1;
+  order: -900;
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.13), transparent 34%),
+    linear-gradient(180deg, rgba(13, 24, 43, 0.95), rgba(7, 14, 28, 0.9));
+  box-shadow:
+    0 20px 64px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.weekFocusHeader h2 {
+  margin: 0 0 0.3rem;
+  font-size: clamp(1.45rem, 3.6vw, 2.25rem);
+  letter-spacing: -0.055em;
+}
+
+.weekFocusHeader p {
+  margin: 0;
+  color: #b8c8de;
+  line-height: 1.45;
+}
+
+.weekFocusGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.weekFocusCard {
+  padding: 0.9rem;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  background:
+    linear-gradient(180deg, rgba(8, 17, 34, 0.86), rgba(4, 11, 23, 0.76));
+}
+
+.weekFocusTag {
+  display: inline-flex;
+  margin-bottom: 0.6rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.11);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  color: #aee8ff;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weekFocusCard h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.04em;
+}
+
+.weekFocusCard p {
+  margin: 0;
+  color: #aebfd6;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 980px) {
+  .weekFocusGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .weekFocusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .thisWeekFocusPanel {
+    padding: 0.85rem;
+    border-radius: 22px;
+  }
+}

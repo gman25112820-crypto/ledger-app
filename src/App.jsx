@@ -399,6 +399,143 @@ export default function App() {
 
       {activeTab === "dashboard" && (
         <section className="dashboardGrid">
+          <div className="quickDecisionBar">
+            <div className={totals.safeToSpend < 0 ? "quickDecisionMain danger" : "quickDecisionMain good"}>
+              <span className="quickLabel">Quick answer</span>
+              <h2>{totals.safeToSpend < 0 ? "No extra spending today" : "Spending is possible, carefully"}</h2>
+              <p>
+                {totals.safeToSpend < 0
+                  ? "Stick to bills, food, fuel and essential shopping. Flexible extras wait."
+                  : "Essentials look covered. Keep the shop controlled and avoid random extras."}
+              </p>
+            </div>
+
+            <div className="quickDecisionCard">
+              <span>Can I shop?</span>
+              <strong>{totals.afterShopping < 0 ? "Essentials only" : "Yes, controlled"}</strong>
+              <small>{money(totals.shoppingLeft)} left on list</small>
+            </div>
+
+            <div className="quickDecisionCard">
+              <span>Bills pressure</span>
+              <strong>{totals.unpaidTotal > 0 ? "Check bills" : "Looks okay"}</strong>
+              <small>{money(totals.unpaidTotal)} unpaid</small>
+            </div>
+
+            <div className="quickDecisionCard">
+              <span>Family goals</span>
+              <strong>{money(totals.goalsSaved)}</strong>
+              <small>saved so far</small>
+            </div>
+          </div>
+
+          <div className="thisWeekFocusPanel">
+            <div className="weekFocusHeader">
+              <div>
+                <span className="quickLabel">This week</span>
+                <h2>Household focus</h2>
+                <p>Keep the week simple. Deal with what matters first, then protect the rest.</p>
+              </div>
+            </div>
+
+            <div className="weekFocusGrid">
+              <div className="weekFocusCard">
+                <span className="weekFocusTag">Bills</span>
+                <h3>{totals.unpaidTotal > 0 ? "Needs checking" : "Looks covered"}</h3>
+                <p>{totals.unpaidTotal > 0 ? money(totals.unpaidTotal) + " is still unpaid or unmarked." : "No unpaid bill pressure showing right now."}</p>
+              </div>
+
+              <div className="weekFocusCard">
+                <span className="weekFocusTag">Shopping</span>
+                <h3>{totals.afterShopping < 0 ? "Essentials only" : "Controlled shop"}</h3>
+                <p>{totals.shoppingLeft > 0 ? money(totals.shoppingLeft) + " remains on the shopping list." : "Shopping list is clear."}</p>
+              </div>
+
+              <div className="weekFocusCard">
+                <span className="weekFocusTag">Goals</span>
+                <h3>{money(totals.goalsSaved)}</h3>
+                <p>Saved toward family goals. Small steady progress is enough.</p>
+              </div>
+
+              <div className="weekFocusCard">
+                <span className="weekFocusTag">Subscriptions</span>
+                <h3>{money(totals.subscriptionsTotal)}</h3>
+                <p>Monthly recurring costs. Review these before payday.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="parentDecisionHome">
+            <div className="decisionHero">
+              <div className="decisionHeroCopy">
+                <span className="decisionKicker">Today’s household money plan</span>
+                <h2>{totals.safeToSpend < 0 ? "Essentials first. Extras wait." : "You have room to plan today."}</h2>
+                <p>
+                  {totals.safeToSpend < 0
+                    ? "Ledger is showing that the visible plan is short after bills, food and fuel are protected. That does not mean panic. It means make the next move carefully."
+                    : "Your essentials are covered by the visible plan. Keep shopping controlled and keep the family goals moving slowly."}
+                </p>
+              </div>
+
+              <div className={totals.safeToSpend < 0 ? "decisionStatus danger" : "decisionStatus good"}>
+                <span>{totals.safeToSpend < 0 ? "Needs attention" : "On track"}</span>
+                <strong>{money(totals.safeToSpend)}</strong>
+                <small>safe to spend after essentials</small>
+              </div>
+            </div>
+
+            <div className="decisionActionGrid">
+              <div className="decisionActionCard">
+                <span className="actionNumber">1</span>
+                <div>
+                  <h3>Protect bills first</h3>
+                  <p>{totals.unpaidTotal > 0 ? money(totals.unpaidTotal) + " still needs covering or marking as paid." : "Bills currently look covered."}</p>
+                </div>
+              </div>
+
+              <div className="decisionActionCard">
+                <span className="actionNumber">2</span>
+                <div>
+                  <h3>Control the shop</h3>
+                  <p>{totals.shoppingLeft > 0 ? money(totals.shoppingLeft) + " is still on the shopping list." : "Shopping list is clear for now."}</p>
+                </div>
+              </div>
+
+              <div className="decisionActionCard">
+                <span className="actionNumber">3</span>
+                <div>
+                  <h3>Delay flexible spending</h3>
+                  <p>{totals.safeToSpend < 0 ? "Treats, extras and non-essentials wait until the plan is covered." : "Only add extras if the week stays steady."}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="decisionMiniGrid">
+              <div>
+                <span>Balance</span>
+                <strong>{money(data.household.currentBalance)}</strong>
+              </div>
+              <div>
+                <span>Unpaid bills</span>
+                <strong>{money(totals.unpaidTotal)}</strong>
+              </div>
+              <div>
+                <span>Shopping left</span>
+                <strong>{money(totals.shoppingLeft)}</strong>
+              </div>
+              <div>
+                <span>Goals saved</span>
+                <strong>{money(totals.goalsSaved)}</strong>
+              </div>
+            </div>
+
+            <div className="decisionPlainEnglish">
+              <strong>Plain English:</strong>{" "}
+              {totals.safeToSpend < 0
+                ? "Your current balance does not cover the full visible plan. Buy essentials first, check the nearest bill, and avoid adding new spending today."
+                : "Your current plan has breathing room. Keep the shop controlled and do not let flexible spending creep up."}
+            </div>
+          </div>
           <div className="card fullWidth commandCard">
             <div>
               <h2>Household command</h2>
