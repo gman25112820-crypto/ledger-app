@@ -69,6 +69,7 @@ const DEFAULT_DATA = {
   incomeTarget: 3200,
   paydayDay: 28,
   householdMode: true,
+  shoppingItems: [],
   bills: [
     { id: "rent", name: "Rent / Housing", amount: 900, dueDay: 1, paid: true, icon: "🏠" },
     { id: "council", name: "Council / Utilities", amount: 180, dueDay: 5, paid: true, icon: "🏛️" },
@@ -337,7 +338,8 @@ function HomeScreen({ data, setData }) {
   const budget = data.categories.reduce((s, c) => s + Number(c.budget || 0), 0);
   const unpaidBills = upcomingBills(data.bills || []);
   const unpaidTotal = unpaidBills.reduce((s, b) => s + Number(b.amount || 0), 0);
-  const safeToSpend = data.income - spent - unpaidTotal;
+  const shoppingTotal = (data.shoppingItems || []).reduce((s, i) => s + Number(i.price || 0), 0);
+  const safeToSpend = data.income - spent - unpaidTotal - shoppingTotal;
   const paydayIn = daysUntilDay(data.paydayDay || 28);
   const days = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -380,6 +382,50 @@ function HomeScreen({ data, setData }) {
           </div>
         </div>
       </GlassCard>
+
+      {/* WEEKLY GROCERY & RECEIPT TRACKER */}
+      <div className="mt-6 bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 className="text-lg font-black text-white tracking-wide uppercase">Weekly Grocery Tracker</h3>
+          <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+            List Total: £{shoppingTotal.toFixed(2)}
+          </span>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <input id="shopItemName" placeholder="Item (e.g., Milk, Eggs)" className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-400 focus:outline-none" />
+          <input id="shopItemPrice" type="number" step="0.01" placeholder="£" className="w-24 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-400 focus:outline-none" />
+          <button onClick={() => {
+            const n = document.getElementById("shopItemName");
+            const p = document.getElementById("shopItemPrice");
+            if (n && p && n.value && p.value) {
+              const newItems = [...(data.shoppingItems || []), { name: n.value, price: parseFloat(p.value) }];
+              setData({ ...data, shoppingItems: newItems });
+              n.value = "";
+              p.value = "";
+            }
+          }} className="bg-cyan-500 text-slate-950 font-black px-5 rounded-xl text-sm hover:bg-cyan-400">Add</button>
+        </div>
+
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+          {!(data.shoppingItems || []).length ? (
+            <p className="text-sm text-slate-500 italic text-center py-4">No grocery items logged yet. Buffer is clear.</p>
+          ) : (
+            data.shoppingItems.map((item, idx) => (
+              <div key={idx} className="flex justify-between items-center bg-slate-950/40 border border-slate-800/60 rounded-xl p-3">
+                <span className="text-sm font-semibold text-slate-300">{item.name}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-black text-white">£{Number(item.price).toFixed(2)}</span>
+                  <button onClick={() => {
+                    const newItems = data.shoppingItems.filter((_, i) => i !== idx);
+                    setData({ ...data, shoppingItems: newItems });
+                  }} className="text-red-400 hover:text-red-500 font-bold px-2">X</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
       <GlassCard className="overflow-hidden bg-gradient-to-br from-emerald-500/14 via-white/[0.06] to-violet-500/12">
         <Label>Today’s money position</Label>
@@ -575,7 +621,8 @@ function localPennyReply(text, data) {
   const budget = data.categories.reduce((s, c) => s + Number(c.budget || 0), 0);
   const unpaid = upcomingBills(data.bills || []);
   const unpaidTotal = unpaid.reduce((s, b) => s + Number(b.amount || 0), 0);
-  const safe = data.income - spent - unpaidTotal;
+  const shoppingTotal = (data.shoppingItems || []).reduce((s, i) => s + Number(i.price || 0), 0);
+  const safe = data.income - spent - unpaidTotal - shoppingTotal;
   const gap = data.incomeTarget - data.income;
   const worst = [...data.categories].sort((a, b) => clampPct(b.spent, b.budget) - clampPct(a.spent, a.budget))[0];
 
@@ -988,7 +1035,8 @@ function PlanScreen({ data }) {
   const spent = data.categories.reduce((s, c) => s + Number(c.spent || 0), 0);
   const unpaid = upcomingBills(data.bills || []);
   const unpaidTotal = unpaid.reduce((s, b) => s + Number(b.amount || 0), 0);
-  const safe = data.income - spent - unpaidTotal;
+  const shoppingTotal = (data.shoppingItems || []).reduce((s, i) => s + Number(i.price || 0), 0);
+  const safe = data.income - spent - unpaidTotal - shoppingTotal;
   const worst = [...data.categories].sort((a, b) => clampPct(b.spent, b.budget) - clampPct(a.spent, a.budget))[0];
   const actions = [
     {
