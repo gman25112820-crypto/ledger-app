@@ -69,20 +69,20 @@ function App() {
         <section className="column">
           <h2>Ledger Overview</h2>
           <div className="metric-card"><h3>Income</h3><p>£{monthlyIncome}</p></div>
-          <div className="metric-card"><h3>Bank</h3><p>£{currentBalance}</p></div>
+          <div className="metric-card"><h3>Bank Balance</h3><p>£{currentBalance}</p></div>
           <div className={`metric-card ${finalRemaining < 0 ? 'deficit' : 'surplus'}`}>
             <h3>Post-Shop Balance</h3>
             <p>£{finalRemaining.toFixed(2)}</p>
           </div>
           
-          <button onClick={resetLedger} className="btn-reset">HARD RESET</button>
+          <button onClick={resetLedger} className="btn-reset">HARD RESET ALL</button>
         </section>
 
         {/* CENTER COLUMN: SHOPPING LIST */}
         <section className="column shopping-section">
           <h2>Weekly Shop</h2>
           <div className="add-item-box">
-            <input placeholder="Item" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} />
+            <input placeholder="Item (e.g. Eggs)" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} />
             <input type="number" placeholder="£" value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)} />
             <button onClick={addItem}>Add</button>
           </div>
@@ -107,12 +107,20 @@ function App() {
              <input type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(Number(e.target.value))} />
           </div>
           <div className="input-group">
-             <label>Bank</label>
+             <label>Bank Balance</label>
              <input type="number" value={currentBalance} onChange={(e) => setCurrentBalance(Number(e.target.value))} />
           </div>
           <div className="input-group">
-             <label>Bills</label>
+             <label>Bills Outstanding</label>
              <input type="number" value={billsPressure} onChange={(e) => setBillsPressure(Number(e.target.value))} />
+          </div>
+          <div className="input-group">
+             <label>Food Budget</label>
+             <input type="number" value={foodBudget} onChange={(e) => setFoodBudget(Number(e.target.value))} />
+          </div>
+          <div className="input-group">
+             <label>Fuel Budget</label>
+             <input type="number" value={fuelBudget} onChange={(e) => setFuelBudget(Number(e.target.value))} />
           </div>
         </section>
       </main>
